@@ -1,9 +1,10 @@
+/* eslint-disable */
 import React from 'react'
 import Sketch from 'react-p5'
-import p5 from 'p5'
 
 let ballX
 let ballY
+let angle = 1
 
 export default class Pong extends React.Component {
   paddleHeight = 80
@@ -27,37 +28,38 @@ export default class Pong extends React.Component {
   draw = p5 => {
     p5.background(220)
 
-    let lrect = p5.rect(
-      this.paddleSideMargin,
-      p5.mouseY - this.paddleHeight / 2,
-      this.paddleWidth,
-      this.paddleHeight
-    )
+    let yy = p5.mouseY - this.paddleHeight / 2
+    let aiY = ballY - this.paddleHeight / 2
 
-    let rrect = p5.rect(
+    if (p5.mouseY > p5.height - this.paddleHeight / 2) {
+      yy = p5.height - this.paddleHeight - 10
+    } else if (p5.mouseY < this.paddleHeight / 2) {
+      yy = 10
+    }
+
+    if (ballY + this.ballSize / 2 > p5.height - this.paddleHeight / 2) {
+      aiY = p5.height - this.paddleHeight - 10
+    } else if (ballY - this.ballSize / 2 < this.paddleHeight / 2) {
+      aiY = 10
+    }
+
+    p5.rect(this.paddleSideMargin, yy, this.paddleWidth, this.paddleHeight)
+
+    p5.rect(
       p5.width - this.paddleSideMargin - this.paddleWidth,
-      p5.mouseY - this.paddleHeight / 2,
+      aiY,
       this.paddleWidth,
       this.paddleHeight
     )
 
     // ball
-    let ball = p5.ellipse(ballX, ballY, this.ballSize)
+    p5.ellipse(ballX, ballY, this.ballSize)
 
-    let rx = 5 * this.dirx
-    let ry = 4 * this.diry
+    let rx = 5 * this.dirx * p5.cos(angle)
+    let ry = 5 * this.diry * p5.sin(angle)
 
     ballX += rx
     ballY += ry
-
-    if (
-      ballX <
-        this.ballSize / 2 + this.paddleSideMargin + this.paddleWidth - 2 ||
-      ballX + this.ballSize / 2 >
-        p5.width - this.paddleSideMargin - this.paddleWidth + 2
-    ) {
-      this.passed = true
-    }
 
     // award points if ball gets passed opponent's paddle
     // then reset ball to center
@@ -67,17 +69,19 @@ export default class Pong extends React.Component {
       ballY = p5.width / 2
       ballX = p5.width / 2
       this.passed = false
+      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     } else if (ballX + this.ballSize / 2 > p5.width) {
       this.scoreleft++
       ballY = p5.width / 2
       ballX = p5.width / 2
       this.passed = false
+      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
 
     p5.text(this.scoreleft, p5.width / 4, 100)
     p5.text(this.scoreright, p5.width / 4 * 3 - this.scoreSize, 100)
 
-    if (ballY + this.ballSize / 2 > p5.height) {
+    if (ballY + this.ballSize / 2 > p5.height + 5) {
       this.diry *= -1
     } else if (ballY < this.ballSize / 2) {
       this.diry *= -1
@@ -91,33 +95,41 @@ export default class Pong extends React.Component {
     // if ball hits left paddle bounce off
     if (
       ballX - this.ballSize / 2 < this.paddleWidth + this.paddleSideMargin &&
-      paddleYRange &&
-      !this.passed
+      ballX - this.ballSize / 2 >
+        this.paddleWidth + this.paddleSideMargin - 6.5 &&
+      paddleYRange
     ) {
       this.dirx *= -1
+      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
+
+    let p =
+      ballY + this.ballSize / 2 > aiY - this.paddleHeight / 2 &&
+      ballY - this.ballSize / 2 < aiY + this.paddleHeight / 2
 
     // if ball hits right paddle bounce off
     if (
       ballX + this.ballSize / 2 >
         p5.width - this.paddleWidth - this.paddleSideMargin &&
-      paddleYRange &&
-      !this.passed
+      ballX + this.ballSize / 2 <
+        p5.width - this.paddleWidth - this.paddleSideMargin + 6.5 &&
+      p
     ) {
       this.dirx *= -1
+      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
 
-    if (this.scoreleft == 5) {
-      p5.textSize(50)
-      p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
+    // if (this.scoreleft == 5) {
+    //   p5.textSize(50)
+    //   p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
 
-      p5.noLoop()
-    } else if (this.scoreright == 5) {
-      p5.textSize(50)
-      p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
+    //   p5.noLoop()
+    // } else if (this.scoreright == 5) {
+    //   p5.textSize(50)
+    //   p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
 
-      p5.noLoop()
-    }
+    //   p5.noLoop()
+    // }
   }
 
   // playAgain() {
