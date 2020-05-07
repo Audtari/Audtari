@@ -6,17 +6,17 @@ import p5 from 'p5'
 import * as tf from '@tensorflow/tfjs'
 import {softmax} from '@tensorflow/tfjs'
 
-const model = tf.sequential()
-model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [4]}))
-model.add(tf.layers.dense({units: 3, activation: softmax}))
+// const model = tf.sequential()
+// model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [4]}))
+// model.add(tf.layers.dense({units: 3, activation: softmax}))
 
-model.compile({loss: categoricalCrossentropy, optimizer: tf.train.adam()})
+// model.compile({loss: categoricalCrossentropy, optimizer: tf.train.adam()})
 
-const xs = tf.tensor2d([1, 2, 3, 4], [4, 1])
-const ys = tf.tensor2d([1, 3, 5, 7], [4, 1])
-model.fit(xs, ys, {epochs: 10}).then(() => {
-  console.log('PREDICT', model.predict(tf.tensor2d([5], [1, 1])))
-})
+// const xs = tf.tensor2d([1, 2, 3, 4], [4, 1])
+// const ys = tf.tensor2d([1, 3, 5, 7], [4, 1])
+// model.fit(xs, ys, {epochs: 10}).then(() => {
+//   console.log('PREDICT', model.predict(tf.tensor2d([5], [1, 1])))
+// })
 
 // Constants
 const BALL_SPEED = 1
