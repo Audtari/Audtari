@@ -1,16 +1,24 @@
 /* eslint-disable */
 import React from 'react'
 import Sketch from 'react-p5'
+import '../../script/lib/p5.speech'
+import p5 from 'p5'
+
+var myRec = new p5.SpeechRec()
+myRec.continuous = true
+myRec.interimResults = true
 
 let ballX
 let ballY
+let leftRecY
+let dx
 let angle = 1
-const MAX_SCORE = 1
+const MAX_SCORE = 10
+let paddleHeight = 80
 
 export default class Pong extends React.Component {
-  paddleHeight = 80
   ballSize = 30
-  paddleWidth = this.paddleHeight / 5
+  paddleWidth = paddleHeight / 5
   paddleSideMargin = 10
   scoreSize = 75
   dirx = 1
@@ -23,46 +31,57 @@ export default class Pong extends React.Component {
     p5.createCanvas(600, 500).parent(canvasParentRef)
     ballX = p5.width / 2
     ballY = p5.height / 2
+    console.log('PADDLE', paddleHeight)
+    leftRecY = p5.height / 2 - paddleHeight / 2
+    console.log('REC', leftRecY)
+    dx = 0
+
     p5.textSize(100)
+
+    myRec.onResult = () => {
+      console.log(myRec)
+      var mostrecentword = myRec.resultString.split(' ').pop()
+      if (mostrecentword.indexOf('up') !== -1) {
+        dx = -2
+      } else if (mostrecentword.indexOf('down') !== -1) {
+        dx = 2
+      }
+    }
+    myRec.start()
   }
 
   draw = p5 => {
     p5.background(220)
 
-    let leftRecY = p5.mouseY - this.paddleHeight / 2
-    let rightRecY = ballY - this.paddleHeight / 2
+    leftRecY += dx
+    let rightRecY = ballY - paddleHeight / 2
 
-    if (p5.mouseY > p5.height - this.paddleHeight / 2) {
-      leftRecY = p5.height - this.paddleHeight - 10
-    } else if (p5.mouseY < this.paddleHeight / 2) {
-      leftRecY = 10
+    if (leftRecY > p5.height - paddleHeight / 2) {
+      dx *= -1
+    } else if (leftRecY < paddleHeight / 2) {
+      dx *= -1
     }
 
-    if (ballY + this.ballSize / 2 > p5.height - this.paddleHeight / 2) {
-      rightRecY = p5.height - this.paddleHeight - 10
-    } else if (ballY - this.ballSize / 2 < this.paddleHeight / 2) {
+    if (ballY + this.ballSize / 2 > p5.height - paddleHeight / 2) {
+      rightRecY = p5.height - paddleHeight - 10
+    } else if (ballY - this.ballSize / 2 < paddleHeight / 2) {
       rightRecY = 10
     }
 
-    p5.rect(
-      this.paddleSideMargin,
-      leftRecY,
-      this.paddleWidth,
-      this.paddleHeight
-    )
+    p5.rect(this.paddleSideMargin, leftRecY, this.paddleWidth, paddleHeight)
 
     p5.rect(
       p5.width - this.paddleSideMargin - this.paddleWidth,
       rightRecY,
       this.paddleWidth,
-      this.paddleHeight
+      paddleHeight
     )
 
     // ball
     p5.ellipse(ballX, ballY, this.ballSize)
 
-    let rx = 5 * this.dirx * p5.cos(angle)
-    let ry = 5 * this.diry * p5.sin(angle)
+    let rx = 1 * this.dirx * p5.cos(angle)
+    let ry = 1 * this.diry * p5.sin(angle)
 
     ballX += rx
     ballY += ry
@@ -95,8 +114,8 @@ export default class Pong extends React.Component {
 
     // ball is within the paddle's y values
     let paddleYRange =
-      ballY + this.ballSize / 2 > p5.mouseY - this.paddleHeight / 2 &&
-      ballY - this.ballSize / 2 < p5.mouseY + this.paddleHeight / 2
+      ballY + this.ballSize / 2 > leftRecY - paddleHeight / 2 &&
+      ballY - this.ballSize / 2 < leftRecY + paddleHeight / 2
 
     // if ball hits left then paddle bounce off
     if (
@@ -110,8 +129,8 @@ export default class Pong extends React.Component {
     }
 
     let p =
-      ballY + this.ballSize / 2 > rightRecY - this.paddleHeight / 2 &&
-      ballY - this.ballSize / 2 < rightRecY + this.paddleHeight / 2
+      ballY + this.ballSize / 2 > rightRecY - paddleHeight / 2 &&
+      ballY - this.ballSize / 2 < rightRecY + paddleHeight / 2
 
     // if ball hits right then paddle bounce off
     if (
