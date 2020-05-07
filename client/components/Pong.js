@@ -3,6 +3,20 @@ import React from 'react'
 import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
+import * as tf from '@tensorflow/tfjs'
+import {softmax} from '@tensorflow/tfjs'
+
+const model = tf.sequential()
+model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [4]}))
+model.add(tf.layers.dense({units: 3, activation: softmax}))
+
+model.compile({loss: categoricalCrossentropy, optimizer: tf.train.adam()})
+
+const xs = tf.tensor2d([1, 2, 3, 4], [4, 1])
+const ys = tf.tensor2d([1, 3, 5, 7], [4, 1])
+model.fit(xs, ys, {epochs: 10}).then(() => {
+  console.log('PREDICT', model.predict(tf.tensor2d([5], [1, 1])))
+})
 
 var myRec = new p5.SpeechRec()
 myRec.continuous = true
@@ -31,9 +45,7 @@ export default class Pong extends React.Component {
     p5.createCanvas(600, 500).parent(canvasParentRef)
     ballX = p5.width / 2
     ballY = p5.height / 2
-    console.log('PADDLE', paddleHeight)
     leftRecY = p5.height / 2 - paddleHeight / 2
-    console.log('REC', leftRecY)
     dx = 0
 
     p5.textSize(100)
