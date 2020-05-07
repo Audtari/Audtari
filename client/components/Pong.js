@@ -31,6 +31,23 @@ let leftRecY
 let angle = 1
 let dy
 
+//Speech Recognition Dictionaries
+let upDictionary = ['up', 'cup', 'sup', 'pup', 'sup', 'yup']
+let downDictionary = [
+  'down',
+  'round',
+  'clown',
+  'sound',
+  'brown',
+  'crown',
+  'noun',
+  'gown',
+  'town',
+  'gown',
+  'around'
+]
+let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey']
+
 export default class Pong extends React.Component {
   paddleSideMargin = 10
   dirx = 1
@@ -51,10 +68,12 @@ export default class Pong extends React.Component {
     myRec.onResult = () => {
       console.log(myRec)
       var mostrecentword = myRec.resultString.split(' ').pop()
-      if (mostrecentword.indexOf('up') !== -1) {
+      if (upDictionary.indexOf(mostrecentword) !== -1) {
         dy = -PADDLE_SPEED
-      } else if (mostrecentword.indexOf('down') !== -1) {
+      } else if (downDictionary.indexOf(mostrecentword) !== -1) {
         dy = PADDLE_SPEED
+      } else if (stayDictionary.indexOf(mostrecentword) !== -1) {
+        dy = 0
       }
     }
     myRec.start()
