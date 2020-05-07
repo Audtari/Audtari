@@ -98,11 +98,11 @@ export default class Pong extends React.Component {
       ballY + this.ballSize / 2 > p5.mouseY - this.paddleHeight / 2 &&
       ballY - this.ballSize / 2 < p5.mouseY + this.paddleHeight / 2
 
-    // if ball hits left paddle bounce off
+    // if ball hits left then paddle bounce off
     if (
       ballX - this.ballSize / 2 < this.paddleWidth + this.paddleSideMargin &&
       ballX - this.ballSize / 2 >
-        this.paddleWidth + this.paddleSideMargin - 6.5 &&
+        this.paddleWidth + this.paddleSideMargin - 0 &&
       paddleYRange
     ) {
       this.dirx *= -1
@@ -113,7 +113,7 @@ export default class Pong extends React.Component {
       ballY + this.ballSize / 2 > rightRecY - this.paddleHeight / 2 &&
       ballY - this.ballSize / 2 < rightRecY + this.paddleHeight / 2
 
-    // if ball hits right paddle bounce off
+    // if ball hits right then paddle bounce off
     if (
       ballX + this.ballSize / 2 >
         p5.width - this.paddleWidth - this.paddleSideMargin &&
