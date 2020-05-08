@@ -19,3 +19,22 @@ form div {
   margin: 1em;
   display: inline-block;
 }
+
+.gameContainer {
+  text-align: center;
+  padding: 50px;
+  background-color: lightpink;
+}
+
+h1 {
+  font-family: 'Press Start 2P', cursive;
+}
+
+.gameTitle {
+  padding: 20px;
+  display: inline;
+}
+
+#mainTitle {
+  text-align: center;
+}

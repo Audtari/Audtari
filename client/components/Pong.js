@@ -32,6 +32,11 @@ let angle = 1
 let dy
 
 export default class Pong extends React.Component {
+  constructor() {
+    super()
+    this.name = 'Pong'
+  }
+
   paddleSideMargin = 10
   dirx = 1
   diry = 1
@@ -63,7 +68,7 @@ export default class Pong extends React.Component {
   }
 
   draw = p5 => {
-    p5.background(220)
+    p5.background(0)
 
     let rightRecY = ballY - PADDLE_HEIGHT / 2
 
@@ -119,6 +124,7 @@ export default class Pong extends React.Component {
     }
 
     // add score to canvas
+    p5.fill('255')
     p5.text(this.scoreleft, p5.width / 4, 100)
     p5.text(this.scoreright, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
 

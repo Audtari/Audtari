@@ -4,8 +4,8 @@ import {withRouter, Route, Switch} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import {Login, Signup, UserHome} from './components'
 import {me} from './store'
-import Pong from './components/Pong'
 import SpeechTest from './components/SpeechTest'
+import singleGamePage from './components/singleGamePage'
 
 /**
  * COMPONENT
@@ -22,7 +22,7 @@ class Routes extends Component {
       <Switch>
         {/* Routes placed here are available to all visitors */}
         <Route path="/login" component={Login} />
-        <Route path="/pong" component={Pong} />
+        <Route path="/pong" component={singleGamePage} />
         <Route path="/speech" component={SpeechTest} />
         <Route path="/signup" component={Signup} />
         {isLoggedIn && (
