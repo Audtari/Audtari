@@ -5,10 +5,10 @@ import '../../script/lib/p5.speech'
 import p5 from 'p5'
 
 // Constants
-const BALL_SPEED = 1
+const BALL_SPEED = 3
 const BALL_SIZE = 30
 
-const PADDLE_SPEED = 2
+const PADDLE_SPEED = 3
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 
@@ -89,11 +89,9 @@ export default class Pong extends React.Component {
 
     // if paddle off bottom screen
     if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
-      // dy *= -1
       leftRecY = p5.height - 10 - PADDLE_HEIGHT
       dy = 0
     } else if (leftRecY < 10) {
-      // dy *= -1
       leftRecY = 10
       dy = 0
     } else {
@@ -126,12 +124,14 @@ export default class Pong extends React.Component {
       ballY = p5.width / 2
       ballX = p5.width / 2
       this.passed = false
+      this.dirx *= -1
       angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     } else if (ballX + BALL_SIZE / 2 > p5.width) {
       this.scoreleft++
       ballY = p5.width / 2
       ballX = p5.width / 2
       this.passed = false
+      this.dirx *= -1
       angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
 
@@ -154,7 +154,8 @@ export default class Pong extends React.Component {
       leftPaddleYRange
     ) {
       this.dirx *= -1
-      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+      ballX += this.paddleSideMargin + PADDLE_WIDTH - BALL_SIZE / 2
+      angle = p5.random(-1 * p5.HALF_PI / 4, p5.HALF_PI / 4)
     }
 
     let rightPaddleYRange =
@@ -167,6 +168,7 @@ export default class Pong extends React.Component {
       rightPaddleYRange
     ) {
       this.dirx *= -1
+      ballX -= this.paddleSideMargin + PADDLE_WIDTH - BALL_SIZE / 2
       angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
 
