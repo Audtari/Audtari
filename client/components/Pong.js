@@ -10,7 +10,7 @@ import {softmax} from '@tensorflow/tfjs'
 // model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [4]}))
 // model.add(tf.layers.dense({units: 3, activation: softmax}))
 
-// model.compile({loss: categoricalCrossentropy, optimizer: tf.train.adam()})
+// model.compile({loss: categoricalCrossentropy, optimizer: 'sgd', metrics: ['accuracy']})
 
 // const xs = tf.tensor2d([1, 2, 3, 4], [4, 1])
 // const ys = tf.tensor2d([1, 3, 5, 7], [4, 1])
