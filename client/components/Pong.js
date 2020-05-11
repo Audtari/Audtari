@@ -3,6 +3,11 @@ import React from 'react'
 import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
+import firebase from 'firebase'
+
+//Firebase db connection
+
+// const db = firebase.database()
 
 // Constants
 const BALL_SPEED = 3
@@ -49,12 +54,31 @@ let downDictionary = [
 let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey']
 
 export default class Pong extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      hello: 7
+    }
+  }
+
   paddleSideMargin = 10
   dirx = 1
   diry = 1
   scoreright = 0
   scoreleft = 0
   passed = false
+
+  componentDidMount() {
+    const rootRef = firebase.database().ref()
+    // const helloRef = rootRef.child('hello')
+    console.log('helloRef in Mount', rootRef)
+    rootRef.on('value', snap => {
+      console.log(snap.val(), 'snapshot val data')
+      this.setState({
+        hello: snap.val().hello
+      })
+    })
+  }
 
   setup(p5, canvasParentRef) {
     p5.createCanvas(WIDTH, HEIGHT).parent(canvasParentRef)
@@ -195,8 +219,12 @@ export default class Pong extends React.Component {
   }
 
   render() {
+    const val = this.state.hello
     return (
       <div>
+        <div>
+          <h1>{val}</h1>
+        </div>
         <Sketch setup={this.setup} draw={this.draw} />
         {/* <button type="button" onClick={playAgain}>
           play again
