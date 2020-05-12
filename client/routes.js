@@ -6,6 +6,7 @@ import {Login, Signup, UserHome} from './components'
 import {me} from './store'
 import Pong from './components/Pong'
 import SpeechTest from './components/SpeechTest'
+import PongMulti from './components/PongMulti'
 
 /**
  * COMPONENT
@@ -23,6 +24,7 @@ class Routes extends Component {
         {/* Routes placed here are available to all visitors */}
         <Route path="/login" component={Login} />
         <Route path="/pong" component={Pong} />
+        <Route path="/multi" component={PongMulti} />
         <Route path="/speech" component={SpeechTest} />
         <Route path="/signup" component={Signup} />
         {isLoggedIn && (
