@@ -14,6 +14,8 @@ const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 
 const MAX_SCORE = 10
 
+let rightRecY
+
 // Canvas dimensions
 const WIDTH = 600
 const HEIGHT = 500
@@ -50,6 +52,8 @@ export default class Pong extends React.Component {
     ballY = p5.height / 2
     leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
     dy = 0
+
+    rightRecY = (p5.height - PADDLE_HEIGHT) / 2
 
     p5.textSize(100)
 
