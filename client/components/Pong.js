@@ -16,6 +16,7 @@ const BALL_SIZE = 30
 const PADDLE_SPEED = 3
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
+const PADDLE_SIDE_MARGIN = 10
 
 const MAX_SCORE = 10
 
@@ -63,8 +64,6 @@ export default class Pong extends React.Component {
       hello: 7
     }
   }
-
-  paddleSideMargin = 10
   dirx = 1
   diry = 1
   scoreright = 0
@@ -106,6 +105,10 @@ export default class Pong extends React.Component {
       }
     }
     myRec.start()
+    myRec.onEnd = continueSpeech
+    function continueSpeech() {
+      myRec.start
+    }
   }
 
   draw = p5 => {
@@ -114,7 +117,7 @@ export default class Pong extends React.Component {
     let rightRecY = ballY - PADDLE_HEIGHT / 2
 
     // left side paddle
-    p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
+    p5.rect(PADDLE_SIDE_MARGIN, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
 
     // if paddle off bottom screen
     if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
@@ -129,7 +132,7 @@ export default class Pong extends React.Component {
 
     // right side paddle
     p5.rect(
-      p5.width - this.paddleSideMargin - PADDLE_WIDTH,
+      p5.width - PADDLE_SIDE_MARGIN - PADDLE_WIDTH,
       rightRecY,
       PADDLE_WIDTH,
       PADDLE_HEIGHT
@@ -180,11 +183,11 @@ export default class Pong extends React.Component {
 
     // if ball hits left then paddle bounce off
     if (
-      ballX - BALL_SIZE / 2 < PADDLE_WIDTH + this.paddleSideMargin &&
+      ballX - BALL_SIZE / 2 < PADDLE_WIDTH + PADDLE_SIDE_MARGIN &&
       leftPaddleYRange
     ) {
       this.dirx *= -1
-      ballX += this.paddleSideMargin + PADDLE_WIDTH - BALL_SIZE / 2
+      ballX += PADDLE_SIDE_MARGIN + PADDLE_WIDTH - BALL_SIZE / 2
       angle = p5.random(-1 * p5.HALF_PI / 4, p5.HALF_PI / 4)
     }
 
@@ -194,11 +197,11 @@ export default class Pong extends React.Component {
 
     // if ball hits right then paddle bounce off
     if (
-      ballX + BALL_SIZE / 2 > p5.width - PADDLE_WIDTH - this.paddleSideMargin &&
+      ballX + BALL_SIZE / 2 > p5.width - PADDLE_WIDTH - PADDLE_SIDE_MARGIN &&
       rightPaddleYRange
     ) {
       this.dirx *= -1
-      ballX -= this.paddleSideMargin + PADDLE_WIDTH - BALL_SIZE / 2
+      ballX -= PADDLE_SIDE_MARGIN + PADDLE_WIDTH - BALL_SIZE / 2
       angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
 
@@ -214,14 +217,6 @@ export default class Pong extends React.Component {
 
       p5.noLoop()
     }
-
-    // playAgain = () => {
-    //   this.scoreleft = 0
-    //   this.scoreright = 0
-    //   this.ballX = this.width / 2
-    //   this.ballY = this.height / 2
-    //   p5.loop()
-    // }
   }
 
   render() {
@@ -232,9 +227,6 @@ export default class Pong extends React.Component {
           <h1>{val}</h1>
         </div>
         <Sketch setup={this.setup} draw={this.draw} />
-        {/* <button type="button" onClick={playAgain}>
-          play again
-        </button> */}
       </div>
     )
   }
