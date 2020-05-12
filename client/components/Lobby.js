@@ -37,9 +37,18 @@ export default class Lobby extends React.Component {
   }
 
   render() {
+    let roomRef = firebase.database().ref('Pong_Rooms/rooms')
+    console.log(roomRef, 'this is the roomRef')
+    roomRef.on('child_added', data => {
+      let rooms = data.val()
+      let keys = Object.keys(rooms)
+
+      console.log(rooms, 'this is rooms within child_added')
+    })
     return (
       <div>
         <h1>This is the Lobby</h1>
+        {/* {roomRef} */}
         <div id="Create Button">
           <button type="button" onClick={() => this.onClick()}>
             Create Room
