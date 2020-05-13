@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
 import Sketch from 'react-p5'
-import p5 from 'p5'
+import p5, {SoundFile} from 'p5'
 import '../../script/lib/p5.speech'
+// import '../../script/lib/p5.sound'
 
 var myRec = new p5.SpeechRec()
 myRec.continuous = true
@@ -9,56 +10,35 @@ myRec.interimResults = true
 var x, y
 var dx, dy
 
+// let mic, fft
+
+// mic = new p5.AudioIn()
+// fft = new p5.FFT()
 export default class SpeechTest extends Component {
   setup(p) {
-    // graphics stuff:
-    p.createCanvas(800, 600)
-    p.background(255, 255, 255)
-    p.fill(0, 0, 0, 255)
-    x = p.width / 2
-    y = p.height / 2
-    dx = 0
-    dy = 0
+    p.createCanvas(710, 400)
+    p.noFill()
 
-    // instructions:
-    p.textSize(20)
-    p.textAlign('left')
-    p.text('draw: up, down, left, right, clear', 20, 20)
-
-    myRec.onResult = () => {
-      var mostrecentword = myRec.resultString.split(' ').pop()
-      if (mostrecentword.indexOf('left') !== -1) {
-        dx = -1
-        dy = 0
-      } else if (mostrecentword.indexOf('right') !== -1) {
-        dx = 1
-        dy = 0
-      } else if (mostrecentword.indexOf('up') !== -1) {
-        dx = 0
-        dy = -1
-      } else if (mostrecentword.indexOf('down') !== -1) {
-        dx = 0
-        dy = 1
-      } else if (mostrecentword.indexOf('clear') !== -1) {
-        p.background(255)
-        console.log(mostrecentword)
-      }
-    } // now in the constructor
-    myRec.start() // start engine
+    // mic = new p.AudioIn()
+    // mic.start()
+    // fft = new p.FFT()
+    // fft.setInput(mic)
   }
 
   draw(p) {
-    p.ellipse(x, y, 5, 5)
-    x += dx
-    y += dy
-    if (x < 0) x = p.width
-    if (y < 0) y = p.height
-    if (x > p.width) x = 0
-    if (y > p.height) y = 0
+    p.background(200)
+
+    // let spectrum = fft.analyze()
+
+    // p.beginShape()
+    // for (i = 0; i < spectrum.length; i++) {
+    //   vertex(i, map(spectrum[i], 0, 255, height, 0))
+    // }
+    // p.endShape()
   }
 
   render() {
-    console.log(myRec)
+    // console.log(myRec)
     return (
       <div>
         <Sketch setup={this.setup} draw={this.draw} />
