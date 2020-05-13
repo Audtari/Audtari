@@ -6,6 +6,7 @@ import history from './history'
 import store from './store'
 import App from './app'
 import * as firebase from 'firebase'
+import * as firebaseui from 'firebaseui'
 
 var firebaseConfig = {
   apiKey: 'AIzaSyB4aOKcTsbXbhse3IZ7_vjLf5TxZAbracU',
@@ -18,8 +19,35 @@ var firebaseConfig = {
   measurementId: 'G-37ER8HZ4L0'
 }
 
+var uiConfig = {
+  callbacks: {
+    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+      return true
+    },
+    uiShown: function() {
+      SVGComponentTransferFunctionElement.getElementById(
+        'loader'
+      ).style.display =
+        'none'
+    }
+  },
+  signInFlow: 'popup',
+  signInSuccessUrl: '/home',
+  signInOptions: [
+    {
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
+    }
+  ]
+}
+
 firebase.initializeApp(firebaseConfig)
 firebase.database()
+var ui = new firebaseui.auth.AuthUI(firebase.auth())
+
+if (ui.isPendingRedirect()) {
+  ui.start('#firebaseui-auth-container', uiConfig)
+}
 
 // establishes socket connection
 import './socket'
