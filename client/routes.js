@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {withRouter, Route, Switch} from 'react-router-dom'
 import PropTypes from 'prop-types'
-import {Login, Signup, UserHome} from './components'
+import {SignInScreen, UserHome} from './components'
 import {me} from './store'
 import SpeechTest from './components/SpeechTest'
 import singleGamePage from './components/singleGamePage'
@@ -24,11 +24,10 @@ class Routes extends Component {
     return (
       <Switch>
         {/* Routes placed here are available to all visitors */}
-        <Route path="/login" component={Login} />
+        <Route path="/login" component={SignInScreen} />
         <Route path="/pong" component={Pong} />
         <Route path="/multi" component={PongMulti} />
         <Route path="/speech" component={SpeechTest} />
-        <Route path="/signup" component={Signup} />
         <Route path="/lobby" component={Lobby} />
         {isLoggedIn && (
           <Switch>
@@ -37,7 +36,7 @@ class Routes extends Component {
           </Switch>
         )}
         {/* Displays our Login component as a fallback */}
-        <Route component={Login} />
+        <Route component={SignInScreen} />
       </Switch>
     )
   }

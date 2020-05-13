@@ -2,17 +2,23 @@ import React from 'react'
 import firebase from 'firebase'
 
 export default class Lobby extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      roomArr: []
+    }
+  }
   componentDidMount() {
-    const rootRef = firebase.database().ref('Pong_Rooms')
-    console.log('helloRef in Mount', rootRef)
-    // rootRef.on('value', (snap) => {
-    //   console.log(snap.val(), 'snapshot val data')
-    //   this.setState({
-    //     ballX: snap.val().ballX,
-    //     ballY: snap.val().ballY,
-    //     leftRecY: snap.val().leftRecY,
-    //   })
-    // })
+    let roomRef = firebase.database().ref('Pong_Rooms')
+    roomRef.on('child_added', data => {
+      let rooms = data.val()
+      let keys = Object.keys(rooms)
+      console.log(keys, 'object.keys')
+
+      this.setState({
+        roomArr: keys
+      })
+    })
   }
 
   onClick() {
@@ -33,22 +39,25 @@ export default class Lobby extends React.Component {
       .database()
       .ref('Pong_Rooms')
       .update(updates)
+    this.setState(prevState => ({
+      roomArr: [...prevState.roomArr, newRoomKey]
+    }))
     console.log('check FB')
   }
 
   render() {
-    let roomRef = firebase.database().ref('Pong_Rooms/rooms')
-    console.log(roomRef, 'this is the roomRef')
-    roomRef.on('child_added', data => {
-      let rooms = data.val()
-      let keys = Object.keys(rooms)
+    // console.log(roomRef, 'this is the roomRef')
 
-      console.log(rooms, 'this is rooms within child_added')
-    })
+    let rooms = this.state.roomArr
+    console.log(rooms, 'this is the room array')
     return (
       <div>
         <h1>This is the Lobby</h1>
-        {/* {roomRef} */}
+        <ul>
+          {rooms.map(room => {
+            return <li key={room}>{room}</li>
+          })}
+        </ul>
         <div id="Create Button">
           <button type="button" onClick={() => this.onClick()}>
             Create Room
