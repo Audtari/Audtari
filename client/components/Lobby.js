@@ -1,5 +1,5 @@
 import React from 'react'
-import firebase from 'firebase'
+import firebase, {database} from 'firebase'
 
 export default class Lobby extends React.Component {
   constructor() {
@@ -31,7 +31,11 @@ export default class Lobby extends React.Component {
       ballX: 300,
       ballY: 250,
       leftRecY: 300,
-      rightRecY: 300
+      rightRecY: 300,
+      users: {
+        player1: '',
+        player2: ''
+      }
     }
     const updates = {}
     updates['/rooms/' + newRoomKey] = newRoomData
@@ -45,6 +49,16 @@ export default class Lobby extends React.Component {
     console.log('check FB')
   }
 
+  onJoin(room) {
+    let currentUser = firebase.auth().currentUser.uid
+    const updates = {}
+    updates['/rooms/' + room + '/users/player1'] = currentUser
+    firebase
+      .database()
+      .ref('Pong_Rooms')
+      .update(updates)
+  }
+
   render() {
     // console.log(roomRef, 'this is the roomRef')
 
@@ -55,7 +69,14 @@ export default class Lobby extends React.Component {
         <h1>This is the Lobby</h1>
         <ul>
           {rooms.map(room => {
-            return <li key={room}>{room}</li>
+            return (
+              <div key={room}>
+                <li>{room}</li>{' '}
+                <button type="button" onClick={() => this.onJoin(room)}>
+                  Join Room
+                </button>
+              </div>
+            )
           })}
         </ul>
         <div id="Create Button">
