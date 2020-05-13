@@ -3,16 +3,16 @@ import React from 'react'
 import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
-import * as tf from '@tensorflow/tfjs'
+// import * as tf from '@tensorflow/tfjs'
 
-const model = tf.sequential()
-model.add(tf.layers.dense({units: 256, inputShape: [8]})) //input is a 1x8
-model.add(tf.layers.dense({units: 512, inputShape: [256]}))
-model.add(tf.layers.dense({units: 256, inputShape: [512]}))
-model.add(tf.layers.dense({units: 3, inputShape: [256]})) //returns a 1x3
-const learningRate = 0.001
-const optimizer = tf.train.adam(learningRate)
-model.compile({loss: 'meanSquaredError', optimizer: optimizer})
+// const model = tf.sequential()
+// model.add(tf.layers.dense({units: 256, inputShape: [8]})) //input is a 1x8
+// model.add(tf.layers.dense({units: 512, inputShape: [256]}))
+// model.add(tf.layers.dense({units: 256, inputShape: [512]}))
+// model.add(tf.layers.dense({units: 3, inputShape: [256]})) //returns a 1x3
+// const learningRate = 0.001
+// const optimizer = tf.train.adam(learningRate)
+// model.compile({loss: 'meanSquaredError', optimizer: optimizer})
 
 // const model = tf.sequential()
 // model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [4]}))
