@@ -3,6 +3,43 @@ import React from 'react'
 import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
+import * as tf from '@tensorflow/tfjs'
+
+const model = tf.sequential()
+model.add(tf.layers.dense({units: 256, inputShape: [8]})) //input is a 1x8
+model.add(tf.layers.dense({units: 512, inputShape: [256]}))
+model.add(tf.layers.dense({units: 256, inputShape: [512]}))
+model.add(tf.layers.dense({units: 3, inputShape: [256]})) //returns a 1x3
+const learningRate = 0.001
+const optimizer = tf.train.adam(learningRate)
+model.compile({loss: 'meanSquaredError', optimizer: optimizer})
+
+// const model = tf.sequential()
+// model.add(tf.layers.dense({units: 50, activation: 'relu', inputShape: [4]}))
+// model.add(tf.layers.dense({units: 3, activation: 'softmax'}))
+
+// model.compile({
+//   loss: 'categoricalCrossentropy',
+//   optimizer: 'sgd',
+//   metrics: ['accuracy'],
+// })
+
+// const xs = tf.tensor2d([1, 2, 3, 4], [4, 1])
+// const ys = tf.tensor2d([1, 3, 5, 7], [4, 1])
+// model.fit(xs, ys, {epochs: 10}).then(() => {
+//   console.log('PREDICT', model.predict(tf.tensor2d([5], [1, 1])))
+// })
+
+//AI training variable
+let previous_data = null
+let training_data = [[], [], []]
+let last_data_object = null
+let turn = 0
+let grab_data = true
+let flip_table = true
+let data_xs
+let index
+let train = true
 import firebase from 'firebase'
 
 //Firebase db connection
@@ -17,7 +54,7 @@ const PADDLE_SPEED = 3
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 
-const MAX_SCORE = 10
+const MAX_SCORE = 100
 
 // Canvas dimensions
 const WIDTH = 600
@@ -32,9 +69,9 @@ myRec.interimResults = true
 
 // global vars
 let ballX, ballY
-let leftRecY
+let leftRecY, rightRecY
 let angle = 1
-let dy
+let leftDY, rightDY
 
 //Speech Recognition Dictionaries
 let upDictionary = ['up', 'cup', 'sup', 'pup', 'sup', 'yup']
@@ -85,7 +122,9 @@ export default class Pong extends React.Component {
     ballX = p5.width / 2
     ballY = p5.height / 2
     leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
-    dy = 0
+    rightRecY = p5.height / 2 - PADDLE_HEIGHT / 2
+    leftDY = 0
+    rightDY = 0
 
     p5.textSize(100)
 
@@ -93,11 +132,11 @@ export default class Pong extends React.Component {
       console.log(myRec)
       var mostrecentword = myRec.resultString.split(' ').pop()
       if (upDictionary.indexOf(mostrecentword) !== -1) {
-        dy = -PADDLE_SPEED
+        leftDY = -PADDLE_SPEED
       } else if (downDictionary.indexOf(mostrecentword) !== -1) {
-        dy = PADDLE_SPEED
+        leftDY = PADDLE_SPEED
       } else if (stayDictionary.indexOf(mostrecentword) !== -1) {
-        dy = 0
+        leftDY = 0
       }
     }
     myRec.start()
@@ -106,20 +145,18 @@ export default class Pong extends React.Component {
   draw = p5 => {
     p5.background(220)
 
-    let rightRecY = ballY - PADDLE_HEIGHT / 2
-
     // left side paddle
     p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
 
     // if paddle off bottom screen
     if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
       leftRecY = p5.height - 10 - PADDLE_HEIGHT
-      dy = 0
+      leftDY = 0
     } else if (leftRecY < 10) {
       leftRecY = 10
-      dy = 0
+      leftDY = 0
     } else {
-      leftRecY += dy
+      leftRecY += leftDY
     }
 
     // right side paddle
@@ -129,6 +166,111 @@ export default class Pong extends React.Component {
       PADDLE_WIDTH,
       PADDLE_HEIGHT
     )
+
+    if (grab_data) {
+      // If this is the very first frame (no prior data):
+      if (previous_data == null) {
+        let data
+        if (flip_table) {
+          data = [
+            p5.height - rightRecY,
+            p5.height - leftRecY,
+            p5.height - ballY,
+            p5.height - ballY
+          ]
+        } else {
+          data = [leftRecY, rightRecY, ballX, ballY]
+        }
+        previous_data = data
+      } else if (flip_table) {
+        data_xs = [
+          p5.height - rightRecY,
+          p5.height - leftRecY,
+          p5.height - ballY,
+          p5.width - ballX
+        ]
+        if (p5.width - leftRecY > previous_data[1]) {
+          index = 0
+        } else if (p5.width - leftRecY == previous_data[1]) {
+          index = 1
+        } else {
+          index = 2
+        }
+        last_data_object = [...previous_data, ...data_xs]
+        training_data[index].push(last_data_object)
+        previous_data = data_xs
+      } else {
+        data_xs = [leftRecY, rightRecY, ballX, ballY]
+        if (leftRecY < previous_data[0]) {
+          index = 0
+        } else if (leftRecY == previous_data[0]) {
+          index = 1
+        } else {
+          index = 2
+        }
+        last_data_object = [...previous_data, ...data_xs]
+        training_data[index].push(last_data_object)
+        previous_data = data_xs
+      }
+    }
+
+    if (turn > 100000) {
+      console.log('balancing')
+
+      //shuffle attempt
+      len = Math.min(
+        training_data[0].length,
+        training_data[1].length,
+        training_data[2].length
+      )
+      if (!len) {
+        console.log('nothing to train')
+        return
+      }
+      data_xs = []
+      data_ys = []
+      for (i = 0; i < 3; i++) {
+        data_xs.push(...training_data[i].slice(0, len))
+        data_ys.push(
+          ...Array(len).fill([i == 0 ? 1 : 0, i == 1 ? 1 : 0, i == 2 ? 1 : 0])
+        )
+      }
+
+      console.log('training')
+      const xs = tf.tensor(data_xs)
+      const ys = tf.tensor(data_ys)
+      ;(async function() {
+        console.log('training2')
+        let result = await model.fit(xs, ys)
+        console.log(result)
+      })()
+      console.log('trained')
+      train = false
+    }
+
+    if (!train) {
+      console.log('predicting')
+      if (this.last_data_object != null) {
+        //use this.last_data_object for input data
+        //do prediction here
+        //return -1/0/1
+        prediction = model.predict(tf.tensor([this.last_data_object]))
+        rightDY = tf.argMax(prediction, 1).dataSync() - 1
+      }
+    } else {
+      rightRecY = ballY
+    }
+    rightRecY += rightDY
+
+    if (rightRecY > p5.height - PADDLE_HEIGHT - 10) {
+      rightRecY = p5.height - 10 - PADDLE_HEIGHT
+      rightDY = 0
+    } else if (rightRecY < 10) {
+      rightRecY = 10
+      rightDY = 0
+    } else {
+      rightRecY += rightDY
+    }
 
     // ball
     p5.ellipse(ballX, ballY, BALL_SIZE)
