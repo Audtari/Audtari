@@ -65,6 +65,7 @@ export default class PongMulti extends React.Component {
       ballY: 300,
       leftRecY: 300
     }
+    this.setup = this.setup.bind(this)
     // let currentUrl = window.location.href
     // let roomCode = currentUrl.split('/')[4]
     // let currentUser = firebase.auth().onAuthStateChanged((user) => {
@@ -92,30 +93,13 @@ export default class PongMulti extends React.Component {
   scoreleft = 0
   passed = false
 
-  componentDidMount() {
-    // let currentUrl = window.location.href
-    // let roomCode = currentUrl.split('/')[4]
-    // let roomRef = firebase
-    //   .database()
-    //   .ref('Pong_Rooms/rooms/' + roomCode + '/users')
-    // let currentUser = firebase.auth().W
-    // console.log(userObj, 'userObj')
-    // let userObj
-    // console.log(roomRef, 'room Ref')
-    // roomRef.once('value', (snap) => {
-    //   userObj = snap.val()
-    // })
-    // console.log(currentUser, 'current User')
-    // // let checkForPlayersRef = firebase
-    // //   .database()
-    // //   .ref('Pong_Rooms/rooms/' + room + '/users')
-  }
+  componentDidMount() {}
 
   setup(p5, canvasParentRef) {
     p5.createCanvas(WIDTH, HEIGHT).parent(canvasParentRef)
     ballX = p5.width / 2
     ballY = p5.height / 2
-    leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
+    this.state.leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
     dy = 0
 
     p5.textSize(100)
@@ -151,10 +135,19 @@ export default class PongMulti extends React.Component {
     console.log(userObj, 'userObj')
     console.log(currentUser, 'current User')
 
-    // if (userObj.player1 === currentUser) {
-    // }
+    if (userObj.player1 === currentUser) {
+    }
+    //Make a call to the database about rightRecY and it's location
 
-    let rightRecY = ballY - PADDLE_HEIGHT / 2
+    let rightRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/rightRecY')
+    let rightRecY
+
+    rightRef.on('value', data => {
+      rightRecY = data.val()
+    })
+    // let rightRecY = ballY - PADDLE_HEIGHT / 2
 
     // left side paddle
     this.state.leftRecY += dy
@@ -198,6 +191,7 @@ export default class PongMulti extends React.Component {
     ballY += ry
 
     //The values to be updated in Firebase
+    leftRecY = this.state.leftRecY
     const gameData = {
       ballX,
       ballY,
