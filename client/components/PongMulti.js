@@ -4,6 +4,7 @@ import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
 import firebase from 'firebase'
+import user from '../store/user'
 
 //Firebase db connection
 
@@ -30,6 +31,23 @@ var myRec = new p5.SpeechRec()
 myRec.continuous = true
 myRec.interimResults = true
 
+//Speech Recognition Dictionaries
+let upDictionary = ['up', 'cup', 'sup', 'pup', 'sup', 'yup']
+let downDictionary = [
+  'down',
+  'round',
+  'clown',
+  'sound',
+  'brown',
+  'crown',
+  'noun',
+  'gown',
+  'town',
+  'gown',
+  'around'
+]
+let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey']
+
 // global vars
 let ballX, ballY
 let leftRecY
@@ -47,6 +65,24 @@ export default class PongMulti extends React.Component {
       ballY: 300,
       leftRecY: 300
     }
+    // let currentUrl = window.location.href
+    // let roomCode = currentUrl.split('/')[4]
+    // let currentUser = firebase.auth().onAuthStateChanged((user) => {
+    //   console.log(user, "here's the user in the authState")
+    //   if (user) {
+    //   }
+    // })
+    // let roomRef = firebase
+    //   .database()
+    //   .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    // let userObj
+    // console.log(roomRef, 'room Ref')
+    // roomRef.once('value', (snap) => {
+    //   console.log(snap.val(), 'Snap val in the once method')
+    //   userObj = snap.val()
+    // })
+    // console.log(userObj, 'userObj')
+    // console.log(currentUser, 'current User')
   }
 
   paddleSideMargin = 10
@@ -57,17 +93,22 @@ export default class PongMulti extends React.Component {
   passed = false
 
   componentDidMount() {
-    // const rootRef = firebase.database().ref()
-    // // const helloRef = rootRef.child('hello')
-    // console.log('helloRef in Mount', rootRef)
-    // rootRef.on('value', (snap) => {
-    //   console.log(snap.val(), 'snapshot val data')
-    //   this.setState({
-    //     ballX: snap.val().ballX,
-    //     ballY: snap.val().ballY,
-    //     leftRecY: snap.val().leftRecY,
-    //   })
+    // let currentUrl = window.location.href
+    // let roomCode = currentUrl.split('/')[4]
+    // let roomRef = firebase
+    //   .database()
+    //   .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    // let currentUser = firebase.auth().W
+    // console.log(userObj, 'userObj')
+    // let userObj
+    // console.log(roomRef, 'room Ref')
+    // roomRef.once('value', (snap) => {
+    //   userObj = snap.val()
     // })
+    // console.log(currentUser, 'current User')
+    // // let checkForPlayersRef = firebase
+    // //   .database()
+    // //   .ref('Pong_Rooms/rooms/' + room + '/users')
   }
 
   setup(p5, canvasParentRef) {
@@ -82,10 +123,12 @@ export default class PongMulti extends React.Component {
     myRec.onResult = () => {
       console.log(myRec)
       var mostrecentword = myRec.resultString.split(' ').pop()
-      if (mostrecentword.indexOf('up') !== -1) {
+      if (upDictionary.indexOf(mostrecentword) !== -1) {
         dy = -PADDLE_SPEED
-      } else if (mostrecentword.indexOf('down') !== -1) {
+      } else if (downDictionary.indexOf(mostrecentword) !== -1) {
         dy = PADDLE_SPEED
+      } else if (stayDictionary.indexOf(mostrecentword) !== -1) {
+        dy = 0
       }
     }
     myRec.start()
@@ -94,10 +137,27 @@ export default class PongMulti extends React.Component {
   draw = p5 => {
     p5.background(220)
 
+    let currentUrl = window.location.href
+    let roomCode = currentUrl.split('/')[4]
+    let user1Ref = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    let currentUser = firebase.auth().W
+
+    let userObj
+    user1Ref.on('value', data => {
+      userObj = data.val()
+    })
+    console.log(userObj, 'userObj')
+    console.log(currentUser, 'current User')
+
+    // if (userObj.player1 === currentUser) {
+    // }
+
     let rightRecY = ballY - PADDLE_HEIGHT / 2
 
-    console.log(this.state.leftRecY, 'can we access state here?')
     // left side paddle
+    this.state.leftRecY += dy
     p5.rect(
       this.paddleSideMargin,
       this.state.leftRecY,
@@ -106,16 +166,16 @@ export default class PongMulti extends React.Component {
     )
 
     // if paddle off bottom screen
-    if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
+    if (this.state.leftRecY > p5.height - PADDLE_HEIGHT - 10) {
       // dy *= -1
-      leftRecY = p5.height - 10 - PADDLE_HEIGHT
+      this.state.leftRecY = p5.height - 10 - PADDLE_HEIGHT
       dy = 0
-    } else if (leftRecY < 10) {
+    } else if (this.state.leftRecY < 10) {
       // dy *= -1
-      leftRecY = 10
+      this.state.leftRecY = 10
       dy = 0
     } else {
-      leftRecY += dy
+      this.state.leftRecY += dy
     }
 
     // right side paddle
@@ -144,11 +204,11 @@ export default class PongMulti extends React.Component {
       leftRecY
     }
 
-    console.log('are we getting to the update?', gameData)
+    // console.log('are we getting to the update?', firebase.auth())
     //Update the database with the new values
     firebase
       .database()
-      .ref('/Pong')
+      .ref('/Pong_Rooms/rooms/' + roomCode)
       .update(gameData)
 
     // award points if ball gets passed opponent's paddle
