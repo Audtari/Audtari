@@ -98,12 +98,7 @@ export default class PongMulti extends React.Component {
     console.log(this.state.leftRecY, 'can we access state here?')
 
     // left side paddle
-    p5.rect(
-      PADDLE_SIDE_MARGIN,
-      this.state.leftRecY,
-      PADDLE_WIDTH,
-      PADDLE_HEIGHT
-    )
+    p5.rect(PADDLE_SIDE_MARGIN, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
 
     // right side paddle
     p5.rect(

@@ -57,8 +57,6 @@ const PADDLE_SIDE_MARGIN = 10
 
 const MAX_SCORE = 100
 
-let rightRecY
-
 // Canvas dimensions
 const WIDTH = 600
 const HEIGHT = 500
