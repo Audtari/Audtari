@@ -4,12 +4,12 @@ import firebase from 'firebase'
 
 var uiConfig = {
   signInFlow: 'popup',
-  signInSuccessWithAuthResult: () => false,
+
   signInOptions: [
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID
-    }
-  ]
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  ],
+  autoUpgradeAnonymousUsers: true
 }
 
 export default class SignInScreen extends Component {

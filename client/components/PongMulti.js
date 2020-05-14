@@ -13,7 +13,7 @@ import firebase from 'firebase'
 const BALL_SPEED = 1
 const BALL_SIZE = 30
 
-const PADDLE_SPEED = 2
+const PADDLE_SPEED = 0.5
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 
@@ -47,6 +47,8 @@ export default class PongMulti extends React.Component {
       ballY: 300,
       leftRecY: 300
     }
+    this.setup = this.setup.bind(this)
+    this.draw = this.draw.bind(this)
   }
 
   paddleSideMargin = 10
@@ -57,6 +59,7 @@ export default class PongMulti extends React.Component {
   passed = false
 
   componentDidMount() {
+    console.log(window.location.href)
     // const rootRef = firebase.database().ref()
     // // const helloRef = rootRef.child('hello')
     // console.log('helloRef in Mount', rootRef)
@@ -65,7 +68,7 @@ export default class PongMulti extends React.Component {
     //   this.setState({
     //     ballX: snap.val().ballX,
     //     ballY: snap.val().ballY,
-    //     leftRecY: snap.val().leftRecY,
+    //     this.state.leftRecY: snap.val().this.state.leftRecY,
     //   })
     // })
   }
@@ -74,7 +77,7 @@ export default class PongMulti extends React.Component {
     p5.createCanvas(WIDTH, HEIGHT).parent(canvasParentRef)
     ballX = p5.width / 2
     ballY = p5.height / 2
-    leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
+    this.state.leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
     dy = 0
 
     p5.textSize(100)
@@ -86,6 +89,8 @@ export default class PongMulti extends React.Component {
         dy = -PADDLE_SPEED
       } else if (mostrecentword.indexOf('down') !== -1) {
         dy = PADDLE_SPEED
+      } else if (mostrecentword.indexOf('stay') !== -1) {
+        dy = 0
       }
     }
     myRec.start()
@@ -96,8 +101,8 @@ export default class PongMulti extends React.Component {
 
     let rightRecY = ballY - PADDLE_HEIGHT / 2
 
-    console.log(this.state.leftRecY, 'can we access state here?')
     // left side paddle
+    this.state.leftRecY += dy
     p5.rect(
       this.paddleSideMargin,
       this.state.leftRecY,
@@ -106,16 +111,16 @@ export default class PongMulti extends React.Component {
     )
 
     // if paddle off bottom screen
-    if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
+    if (this.state.leftRecY > p5.height - PADDLE_HEIGHT - 10) {
       // dy *= -1
-      leftRecY = p5.height - 10 - PADDLE_HEIGHT
+      this.state.leftRecY = p5.height - 10 - PADDLE_HEIGHT
       dy = 0
-    } else if (leftRecY < 10) {
+    } else if (this.state.leftRecY < 10) {
       // dy *= -1
-      leftRecY = 10
+      this.state.leftRecY = 10
       dy = 0
     } else {
-      leftRecY += dy
+      this.state.leftRecY += dy
     }
 
     // right side paddle
@@ -138,13 +143,14 @@ export default class PongMulti extends React.Component {
     ballY += ry
 
     //The values to be updated in Firebase
+    leftRecY = this.state.leftRecY
+
     const gameData = {
       ballX,
       ballY,
       leftRecY
     }
 
-    console.log('are we getting to the update?', gameData)
     //Update the database with the new values
     firebase
       .database()
@@ -178,7 +184,8 @@ export default class PongMulti extends React.Component {
       this.diry *= -1
     }
 
-    let leftPaddleYRange = ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
+    let leftPaddleYRange =
+      ballY > this.state.leftRecY && ballY < this.state.leftRecY + PADDLE_HEIGHT
 
     // if ball hits left then paddle bounce off
     if (
