@@ -4,6 +4,7 @@ import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
 import firebase from 'firebase'
+import user from '../store/user'
 
 //Firebase db connection
 
@@ -64,6 +65,24 @@ export default class PongMulti extends React.Component {
       ballY: 300,
       leftRecY: 300
     }
+    // let currentUrl = window.location.href
+    // let roomCode = currentUrl.split('/')[4]
+    // let currentUser = firebase.auth().onAuthStateChanged((user) => {
+    //   console.log(user, "here's the user in the authState")
+    //   if (user) {
+    //   }
+    // })
+    // let roomRef = firebase
+    //   .database()
+    //   .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    // let userObj
+    // console.log(roomRef, 'room Ref')
+    // roomRef.once('value', (snap) => {
+    //   console.log(snap.val(), 'Snap val in the once method')
+    //   userObj = snap.val()
+    // })
+    // console.log(userObj, 'userObj')
+    // console.log(currentUser, 'current User')
   }
 
   paddleSideMargin = 10
@@ -74,30 +93,29 @@ export default class PongMulti extends React.Component {
   passed = false
 
   componentDidMount() {
-    let currentUrl = window.location.href
-    let roomCode = currentUrl.split('/')[4]
-    let currentUser = firebase.auth()
-    let roomRef = firebase
-      .database()
-      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
-    let userObj
-    console.log(roomRef, 'room Ref')
-    roomRef.once('value', snap => {
-      console.log(snap.val(), 'Snap val in the once method')
-      userObj = snap.val()
-    })
-    console.log(userObj, 'userObj')
-    console.log(currentUser, 'current User')
-    // let checkForPlayersRef = firebase
+    // let currentUrl = window.location.href
+    // let roomCode = currentUrl.split('/')[4]
+    // let roomRef = firebase
     //   .database()
-    //   .ref('Pong_Rooms/rooms/' + room + '/users')
+    //   .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    // let currentUser = firebase.auth().W
+    // console.log(userObj, 'userObj')
+    // let userObj
+    // console.log(roomRef, 'room Ref')
+    // roomRef.once('value', (snap) => {
+    //   userObj = snap.val()
+    // })
+    // console.log(currentUser, 'current User')
+    // // let checkForPlayersRef = firebase
+    // //   .database()
+    // //   .ref('Pong_Rooms/rooms/' + room + '/users')
   }
 
   setup(p5, canvasParentRef) {
     p5.createCanvas(WIDTH, HEIGHT).parent(canvasParentRef)
     ballX = p5.width / 2
     ballY = p5.height / 2
-    this.state.leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
+    leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
     dy = 0
 
     p5.textSize(100)
@@ -106,11 +124,11 @@ export default class PongMulti extends React.Component {
       console.log(myRec)
       var mostrecentword = myRec.resultString.split(' ').pop()
       if (upDictionary.indexOf(mostrecentword) !== -1) {
-        leftDY = -PADDLE_SPEED
+        dy = -PADDLE_SPEED
       } else if (downDictionary.indexOf(mostrecentword) !== -1) {
-        leftDY = PADDLE_SPEED
+        dy = PADDLE_SPEED
       } else if (stayDictionary.indexOf(mostrecentword) !== -1) {
-        leftDY = 0
+        dy = 0
       }
     }
     myRec.start()
@@ -119,9 +137,25 @@ export default class PongMulti extends React.Component {
   draw = p5 => {
     p5.background(220)
 
+    let currentUrl = window.location.href
+    let roomCode = currentUrl.split('/')[4]
+    let user1Ref = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    let currentUser = firebase.auth().W
+
+    let userObj
+    user1Ref.on('value', data => {
+      userObj = data.val()
+    })
+    console.log(userObj, 'userObj')
+    console.log(currentUser, 'current User')
+
+    // if (userObj.player1 === currentUser) {
+    // }
+
     let rightRecY = ballY - PADDLE_HEIGHT / 2
 
-    console.log(this.state.leftRecY, 'can we access state here?')
     // left side paddle
     this.state.leftRecY += dy
     p5.rect(
@@ -170,11 +204,11 @@ export default class PongMulti extends React.Component {
       leftRecY
     }
 
-    console.log('are we getting to the update?', gameData)
+    // console.log('are we getting to the update?', firebase.auth())
     //Update the database with the new values
     firebase
       .database()
-      .ref('/Pong')
+      .ref('/Pong_Rooms/rooms/' + roomCode)
       .update(gameData)
 
     // award points if ball gets passed opponent's paddle
