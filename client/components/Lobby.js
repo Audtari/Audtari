@@ -1,5 +1,5 @@
 import React from 'react'
-import firebase, {database} from 'firebase'
+import firebase from 'firebase'
 
 export default class Lobby extends React.Component {
   constructor() {
@@ -32,8 +32,9 @@ export default class Lobby extends React.Component {
       ballY: 250,
       leftRecY: 300,
       rightRecY: 300,
+      gameState: 'empty',
       users: {
-        player1: '',
+        player1: 'user1',
         player2: ''
       }
     }
@@ -51,8 +52,23 @@ export default class Lobby extends React.Component {
 
   onJoin(room) {
     let currentUser = firebase.auth().currentUser.uid
+    let checkForPlayersRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + room + '/users')
     const updates = {}
-    updates['/rooms/' + room + '/users/player1'] = currentUser
+    console.log(checkForPlayersRef, 'check for players ref')
+    let userObj
+    checkForPlayersRef.once('value', data => {
+      userObj = data.val()
+    })
+    console.log(userObj)
+    if (userObj.player1 === 'user1') {
+      updates['/rooms/' + room + '/users/player1'] = currentUser
+      updates['/rooms/' + room + '/gameState'] = 'waiting'
+    } else {
+      updates['/rooms/' + room + '/users/player2'] = currentUser
+      updates['/rooms/' + room + '/gameState'] = 'active'
+    }
     firebase
       .database()
       .ref('Pong_Rooms')
