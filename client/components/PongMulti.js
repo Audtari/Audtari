@@ -14,7 +14,7 @@ import firebase from 'firebase'
 const BALL_SPEED = 5
 const BALL_SIZE = 30
 
-const PADDLE_SPEED = 2
+const PADDLE_SPEED = 0.5
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 
@@ -54,6 +54,8 @@ let ballX, ballY
 let leftRecY, rightRecY
 let angle = 1
 let dy
+let timer = 300
+let text
 let currentBallX, currentBallY
 let currentUrl, roomCode, userRef, currentUser, userObj
 
@@ -62,13 +64,14 @@ export default class PongMulti extends React.Component {
     super()
     this.state = {
       hello: 7,
+      gameState: '',
       play: false,
       gameOver: false,
       ballX: 250,
       ballY: 300
     }
     this.setup = this.setup.bind(this)
-    this.mouseClicked = this.mouseClicked.bind(this)
+    // this.mouseClicked = this.mouseClicked.bind(this)
     // let currentUrl = window.location.href
     // let roomCode = currentUrl.split('/')[4]
     // let currentUser = firebase.auth().onAuthStateChanged((user) => {
@@ -100,8 +103,16 @@ export default class PongMulti extends React.Component {
   userRef = firebase
     .database()
     .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
+  gameState
 
-  componentDidMount() {}
+  componentDidMount() {
+    let gameStateRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + this.roomCode + '/gameState')
+    gameStateRef.on('value', data => {
+      this.setState({gameState: data.val()})
+    })
+  }
 
   setup(p5, canvasParentRef) {
     p5.createCanvas(WIDTH, HEIGHT).parent(canvasParentRef)
@@ -136,7 +147,7 @@ export default class PongMulti extends React.Component {
       }
     })
 
-    p5.noLoop()
+    // p5.noLoop()
   }
 
   draw = p5 => {
@@ -151,231 +162,239 @@ export default class PongMulti extends React.Component {
     //     })
     //     console.log(userObj, 'userObj')
     //     console.log(this.currentUser, 'current User')
-    if (this.state.play === false) {
-      return
-    }
-    let gameData
-    //Conditional rendering based on who is which player
 
-    if (this.userObj.player1 === this.currentUser) {
-      //Make a call to the database about rightRecY and it's location
-      let rightRef = firebase
-        .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/rightRecY')
-
-      rightRef.on('value', data => {
-        rightRecY = data.val()
-      })
-      leftRecY += dy
-    } else if (this.userObj.player2 === this.currentUser) {
-      let leftRef = firebase
-        .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/leftRecY')
-
-      leftRef.on('value', data => {
-        leftRecY = data.val()
-      })
-      rightRecY += dy
-    }
-
-    // let rightRecY = ballY - PADDLE_HEIGHT / 2
-
-    // left side paddle
-    p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
-
-    // if paddle off bottom screen
-    if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
-      // dy *= -1
-      leftRecY = p5.height - 10 - PADDLE_HEIGHT
-      dy = 0
-    } else if (leftRecY < 10) {
-      // dy *= -1
-      leftRecY = 10
-      dy = 0
+    if (this.state.gameState !== 'active') {
+      p5.text('Waiting for another player', 10, p5.height / 2)
+    } else if (timer > 0) {
+      if (timer % 60 == 0) {
+        text = timer / 60
+      }
+      p5.text(text, p5.width / 2, p5.height / 2)
+      timer--
     } else {
-      leftRecY += dy
-    }
+      let gameData
+      //Conditional rendering based on who is which player
 
-    // right side paddle
-    p5.rect(
-      p5.width - this.paddleSideMargin - PADDLE_WIDTH,
-      rightRecY,
-      PADDLE_WIDTH,
-      PADDLE_HEIGHT
-    )
+      if (this.userObj.player1 === this.currentUser) {
+        //Make a call to the database about rightRecY and it's location
+        let rightRef = firebase
+          .database()
+          .ref('Pong_Rooms/rooms/' + this.roomCode + '/rightRecY')
 
-    // if paddle off bottom screen
-    if (rightRecY > p5.height - PADDLE_HEIGHT - 10) {
-      // dy *= -1
-      rightRecY = p5.height - 10 - PADDLE_HEIGHT
-      dy = 0
-    } else if (rightRecY < 10) {
-      // dy *= -1
-      rightRecY = 10
-      dy = 0
-    } else {
-      rightRecY += dy
-    }
+        rightRef.on('value', data => {
+          rightRecY = data.val()
+        })
+        leftRecY += dy
+      } else if (this.userObj.player2 === this.currentUser) {
+        let leftRef = firebase
+          .database()
+          .ref('Pong_Rooms/rooms/' + this.roomCode + '/leftRecY')
 
-    //Ball ref from database
-    let ballXRef = firebase
-      .database()
-      .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballX')
-    let ballYRef = firebase
-      .database()
-      .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballY')
-
-    //Set the database value to the rendered ball
-    ballXRef.on('value', data => {
-      ballX = data.val()
-    })
-
-    ballYRef.on('value', data => {
-      ballY = data.val()
-    })
-
-    // ball
-    p5.ellipse(ballX, ballY, BALL_SIZE)
-
-    // calculate ball bounce angle
-    let rx = BALL_SPEED * this.dirx * p5.cos(angle)
-    let ry = BALL_SPEED * this.diry * p5.sin(angle)
-
-    // move ball at angle
-    ballX += rx
-    ballY += ry
-
-    //The values to be updated in Firebase
-    // leftRecY = this.state.leftRecY
-    // const gameData = {
-    //   ballX,
-    //   ballY,
-    //   leftRecY,
-    // }
-
-    // console.log('are we getting to the update?', firebase.auth())
-    //Update the database with the new values
-    if (this.userObj.player1 === this.currentUser) {
-      gameData = {
-        ballX,
-        ballY,
-        leftRecY
+        leftRef.on('value', data => {
+          leftRecY = data.val()
+        })
+        rightRecY += dy
       }
-      firebase
-        .database()
-        .ref('/Pong_Rooms/rooms/' + this.roomCode)
-        .update(gameData)
-    } else if (this.userObj.player2 === this.currentUser) {
-      gameData = {
-        rightRecY
+
+      // let rightRecY = ballY - PADDLE_HEIGHT / 2
+
+      // left side paddle
+      p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
+
+      // if paddle off bottom screen
+      if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
+        // dy *= -1
+        leftRecY = p5.height - 10 - PADDLE_HEIGHT
+        dy = 0
+      } else if (leftRecY < 10) {
+        // dy *= -1
+        leftRecY = 10
+        dy = 0
+      } else {
+        leftRecY += dy
       }
-      firebase
-        .database()
-        .ref('/Pong_Rooms/rooms/' + this.roomCode)
-        .update(gameData)
-    }
-    // award points if ball gets passed opponent's paddle
-    // then reset ball to center
-    let ballResetData
-    if (ballX < BALL_SIZE / 2) {
-      this.scoreright++
-      ballY = p5.width / 2
-      ballX = p5.width / 2
-      ballResetData = {
-        ballX,
-        ballY
+
+      // right side paddle
+      p5.rect(
+        p5.width - this.paddleSideMargin - PADDLE_WIDTH,
+        rightRecY,
+        PADDLE_WIDTH,
+        PADDLE_HEIGHT
+      )
+
+      // if paddle off bottom screen
+      if (rightRecY > p5.height - PADDLE_HEIGHT - 10) {
+        // dy *= -1
+        rightRecY = p5.height - 10 - PADDLE_HEIGHT
+        dy = 0
+      } else if (rightRecY < 10) {
+        // dy *= -1
+        rightRecY = 10
+        dy = 0
+      } else {
+        rightRecY += dy
       }
-      firebase
+
+      //Ball ref from database
+      let ballXRef = firebase
         .database()
-        .ref('/Pong_Rooms/rooms/' + this.roomCode)
-        .update(ballResetData)
-      this.passed = false
-      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
-    } else if (ballX + BALL_SIZE / 2 > p5.width) {
-      this.scoreleft++
-      ballY = p5.width / 2
-      ballX = p5.width / 2
-      ballResetData = {
-        ballX,
-        ballY
-      }
-      firebase
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballX')
+      let ballYRef = firebase
         .database()
-        .ref('/Pong_Rooms/rooms/' + this.roomCode)
-        .update(ballResetData)
-      this.passed = false
-      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
-    }
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballY')
 
-    // add score to canvas
-    p5.text(this.scoreleft, p5.width / 4, 100)
-    p5.text(this.scoreright, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
-
-    // ball bounces off of top and bottom of screen
-    if (ballY + BALL_SIZE / 2 > p5.height + 5) {
-      this.diry *= -1
-    } else if (ballY < BALL_SIZE / 2) {
-      this.diry *= -1
-    }
-
-    let leftPaddleYRange = ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
-
-    // if ball hits left then paddle bounce off
-    if (
-      ballX - BALL_SIZE / 2 < PADDLE_WIDTH + this.paddleSideMargin &&
-      leftPaddleYRange
-    ) {
-      this.dirx *= -1
-      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
-    }
-
-    let rightPaddleYRange =
-      ballY + BALL_SIZE / 2 > rightRecY - PADDLE_HEIGHT / 2 &&
-      ballY - BALL_SIZE / 2 < rightRecY + PADDLE_HEIGHT / 2
-
-    // if ball hits right then paddle bounce off
-    if (
-      ballX + BALL_SIZE / 2 > p5.width - PADDLE_WIDTH - this.paddleSideMargin &&
-      rightPaddleYRange
-    ) {
-      this.dirx *= -1
-      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
-    }
-
-    // show end game screen
-    if (this.scoreleft == MAX_SCORE) {
-      p5.textSize(50)
-      p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-      this.setState({
-        play: false,
-        gameOver: true
+      //Set the database value to the rendered ball
+      ballXRef.on('value', data => {
+        ballX = data.val()
       })
-      p5.noLoop()
-    } else if (this.scoreright == MAX_SCORE) {
-      p5.textSize(50)
-      p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
-      this.setState({
-        play: false,
-        gameOver: true
-      })
-      p5.noLoop()
-    }
 
-    // playAgain = () => {
-    //   this.scoreleft = 0
-    //   this.scoreright = 0
-    //   this.ballX = this.width / 2
-    //   this.ballY = this.height / 2
-    //   p5.loop()
-    // }
+      ballYRef.on('value', data => {
+        ballY = data.val()
+      })
+
+      // ball
+      p5.ellipse(ballX, ballY, BALL_SIZE)
+
+      // calculate ball bounce angle
+      let rx = BALL_SPEED * this.dirx * p5.cos(angle)
+      let ry = BALL_SPEED * this.diry * p5.sin(angle)
+
+      // move ball at angle
+      ballX += rx
+      ballY += ry
+
+      //The values to be updated in Firebase
+      // leftRecY = this.state.leftRecY
+      // const gameData = {
+      //   ballX,
+      //   ballY,
+      //   leftRecY,
+      // }
+
+      //Update the database with the new values
+      if (this.userObj.player1 === this.currentUser) {
+        gameData = {
+          ballX,
+          ballY,
+          leftRecY
+        }
+        firebase
+          .database()
+          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .update(gameData)
+      } else if (this.userObj.player2 === this.currentUser) {
+        gameData = {
+          rightRecY
+        }
+        firebase
+          .database()
+          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .update(gameData)
+      }
+      // award points if ball gets passed opponent's paddle
+      // then reset ball to center
+      let ballResetData
+      if (ballX < BALL_SIZE / 2) {
+        this.scoreright++
+        ballY = p5.width / 2
+        ballX = p5.width / 2
+        ballResetData = {
+          ballX,
+          ballY
+        }
+        firebase
+          .database()
+          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .update(ballResetData)
+        this.passed = false
+        angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+      } else if (ballX + BALL_SIZE / 2 > p5.width) {
+        this.scoreleft++
+        ballY = p5.width / 2
+        ballX = p5.width / 2
+        ballResetData = {
+          ballX,
+          ballY
+        }
+        firebase
+          .database()
+          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .update(ballResetData)
+        this.passed = false
+        angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+      }
+
+      // add score to canvas
+      p5.text(this.scoreleft, p5.width / 4, 100)
+      p5.text(this.scoreright, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
+
+      // ball bounces off of top and bottom of screen
+      if (ballY + BALL_SIZE / 2 > p5.height + 5) {
+        this.diry *= -1
+      } else if (ballY < BALL_SIZE / 2) {
+        this.diry *= -1
+      }
+
+      let leftPaddleYRange =
+        ballY > this.state.leftRecY &&
+        ballY < this.state.leftRecY + PADDLE_HEIGHT
+
+      // if ball hits left then paddle bounce off
+      if (
+        ballX - BALL_SIZE / 2 < PADDLE_WIDTH + this.paddleSideMargin &&
+        leftPaddleYRange
+      ) {
+        this.dirx *= -1
+        angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+      }
+
+      let rightPaddleYRange =
+        ballY + BALL_SIZE / 2 > rightRecY - PADDLE_HEIGHT / 2 &&
+        ballY - BALL_SIZE / 2 < rightRecY + PADDLE_HEIGHT / 2
+
+      // if ball hits right then paddle bounce off
+      if (
+        ballX + BALL_SIZE / 2 >
+          p5.width - PADDLE_WIDTH - this.paddleSideMargin &&
+        rightPaddleYRange
+      ) {
+        this.dirx *= -1
+        angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+      }
+
+      // show end game screen
+      if (this.scoreleft == MAX_SCORE) {
+        p5.textSize(50)
+        p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
+
+        // show end game screen
+        if (this.scoreleft == MAX_SCORE) {
+          p5.textSize(50)
+          p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
+          this.setState({
+            play: false,
+            gameOver: true
+          })
+          p5.noLoop()
+        } else if (this.scoreright == MAX_SCORE) {
+          p5.textSize(50)
+          p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
+          this.setState({
+            play: false,
+            gameOver: true
+          })
+          p5.noLoop()
+        }
+      }
+    }
   }
 
-  mouseClicked(p5) {
-    this.setState({
-      play: true
-    })
-    p5.loop()
-  }
+  // mouseClicked(p5) {
+  //   this.setState({
+  //     play: true,
+  //   })
+  //   p5.loop()
+  // }
 
   backToLobby() {
     window.location.href = `/lobby`

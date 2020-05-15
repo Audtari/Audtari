@@ -49,7 +49,13 @@ export default class Lobby extends React.Component {
   }
 
   onJoin(room) {
-    let currentUser = firebase.auth().currentUser.uid
+    let currentUser
+    if (!firebase.auth().currentUser) {
+      currentUser = firebase.auth().signInAnonymously()
+    } else {
+      currentUser = firebase.auth().currentUser.uid
+    }
+    console.log('CURRENT USER', currentUser)
     let checkForPlayersRef = firebase
       .database()
       .ref('Pong_Rooms/rooms/' + room + '/users')
