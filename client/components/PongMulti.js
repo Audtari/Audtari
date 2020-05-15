@@ -11,7 +11,7 @@ import firebase from 'firebase'
 // const db = firebase.database()
 
 // Constants
-const BALL_SPEED = 1
+const BALL_SPEED = 5
 const BALL_SIZE = 30
 
 const PADDLE_SPEED = 2
@@ -63,6 +63,7 @@ export default class PongMulti extends React.Component {
     this.state = {
       hello: 7,
       play: false,
+      gameOver: false,
       ballX: 250,
       ballY: 300
     }
@@ -345,12 +346,18 @@ export default class PongMulti extends React.Component {
     if (this.scoreleft == MAX_SCORE) {
       p5.textSize(50)
       p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-
+      this.setState({
+        play: false,
+        gameOver: true
+      })
       p5.noLoop()
     } else if (this.scoreright == MAX_SCORE) {
       p5.textSize(50)
       p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
-
+      this.setState({
+        play: false,
+        gameOver: true
+      })
       p5.noLoop()
     }
 
@@ -370,6 +377,67 @@ export default class PongMulti extends React.Component {
     p5.loop()
   }
 
+  backToLobby() {
+    window.location.href = `/lobby`
+    let deleteRef = firebase.database().ref('Pong_Rooms/rooms/' + this.roomCode)
+    if (
+      this.state.gameOver === true &&
+      this.userObj.player1 === '' &&
+      this.userObj.player2 === ''
+    ) {
+      deleteRef.remove()
+    } else {
+      //  else if(this.state.gameOver === true && this.userObj.player1.length > 0 || this.userObj.player2.length > 0){
+      // }
+      let backToLobbyRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
+      let roomUpdate
+      let emptyGameState
+      let waitingGameState
+      emptyGameState = {
+        gameState: 'empty'
+      }
+      waitingGameState = {
+        gameState: 'waiting'
+      }
+      if (this.userObj.player1 === this.currentUser && !this.userObj.player2) {
+        roomUpdate = {
+          player1: ''
+        }
+        backToLobbyRef.update(roomUpdate)
+        deleteRef.update(emptyGameState)
+      } else if (
+        this.userObj.player1 === this.currentUser &&
+        this.userObj.player2
+      ) {
+        roomUpdate = {
+          player1: ''
+        }
+        backToLobbyRef.update(roomUpdate)
+        deleteRef.update(waitingGameState)
+      } else if (
+        this.userObj.player2 === this.currentUser &&
+        !this.userObj.player1
+      ) {
+        roomUpdate = {
+          player2: ''
+        }
+        backToLobbyRef.update(roomUpdate)
+        deleteRef.update(emptyGameState)
+      } else if (
+        this.userObj.player2 === this.currentUser &&
+        this.userObj.player1
+      ) {
+        roomUpdate = {
+          player2: ''
+        }
+        backToLobbyRef.update(roomUpdate)
+        deleteRef.update(waitingGameState)
+      }
+    }
+  }
+
   render() {
     const val = this.state.hello
     return (
@@ -385,9 +453,9 @@ export default class PongMulti extends React.Component {
           setup={this.setup}
           draw={this.draw}
         />
-        {/* <button type="button" onClick={playAgain}>
-          play again
-        </button> */}
+        <button type="button" onClick={() => this.backToLobby()}>
+          Back to the Lobby
+        </button>
       </div>
     )
   }
