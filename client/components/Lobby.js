@@ -13,7 +13,6 @@ export default class Lobby extends React.Component {
     roomRef.on('child_added', data => {
       let rooms = data.val()
       let keys = Object.keys(rooms)
-      console.log(keys, 'object.keys')
 
       this.setState({
         roomArr: keys
@@ -47,7 +46,6 @@ export default class Lobby extends React.Component {
     this.setState(prevState => ({
       roomArr: [...prevState.roomArr, newRoomKey]
     }))
-    console.log('check FB')
   }
 
   onJoin(room) {
@@ -62,12 +60,10 @@ export default class Lobby extends React.Component {
       .database()
       .ref('Pong_Rooms/rooms/' + room + '/users')
     const updates = {}
-    console.log(checkForPlayersRef, 'check for players ref')
     let userObj
     checkForPlayersRef.once('value', data => {
       userObj = data.val()
     })
-    console.log(userObj)
     if (userObj.player1 === 'user1') {
       updates['/rooms/' + room + '/users/player1'] = currentUser
       updates['/rooms/' + room + '/gameState'] = 'waiting'
@@ -79,13 +75,13 @@ export default class Lobby extends React.Component {
       .database()
       .ref('Pong_Rooms')
       .update(updates)
+    window.location.href = `/multi/${room}`
   }
 
   render() {
     // console.log(roomRef, 'this is the roomRef')
 
     let rooms = this.state.roomArr
-    console.log(rooms, 'this is the room array')
     return (
       <div>
         <h1>This is the Lobby</h1>
