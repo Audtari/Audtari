@@ -63,8 +63,7 @@ export default class PongMulti extends React.Component {
       hello: 7,
       play: false,
       ballX: 250,
-      ballY: 300,
-      leftRecY: 300
+      ballY: 300
     }
     this.setup = this.setup.bind(this)
     this.mouseClicked = this.mouseClicked.bind(this)
@@ -107,6 +106,7 @@ export default class PongMulti extends React.Component {
     ballX = p5.width / 2
     ballY = p5.height / 2
     leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
+    rightRecY = p5.height / 2 - PADDLE_HEIGHT / 2
     dy = 0
 
     p5.textSize(100)
@@ -162,10 +162,6 @@ export default class PongMulti extends React.Component {
         .ref('Pong_Rooms/rooms/' + this.roomCode + '/rightRecY')
 
       rightRef.on('value', data => {
-        console.log(
-          data.val(),
-          'are we grabbing the data right here in rightRef?'
-        )
         rightRecY = data.val()
       })
       leftRecY += dy
@@ -178,12 +174,6 @@ export default class PongMulti extends React.Component {
         leftRecY = data.val()
       })
       rightRecY += dy
-
-      gameData = {
-        ballX,
-        ballY,
-        rightRecY
-      }
     }
 
     // let rightRecY = ballY - PADDLE_HEIGHT / 2
@@ -211,6 +201,36 @@ export default class PongMulti extends React.Component {
       PADDLE_WIDTH,
       PADDLE_HEIGHT
     )
+
+    // if paddle off bottom screen
+    if (rightRecY > p5.height - PADDLE_HEIGHT - 10) {
+      // dy *= -1
+      rightRecY = p5.height - 10 - PADDLE_HEIGHT
+      dy = 0
+    } else if (rightRecY < 10) {
+      // dy *= -1
+      rightRecY = 10
+      dy = 0
+    } else {
+      rightRecY += dy
+    }
+
+    //Ball ref from database
+    let ballXRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballX')
+    let ballYRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballY')
+
+    //Set the database value to the rendered ball
+    ballXRef.on('value', data => {
+      ballX = data.val()
+    })
+
+    ballYRef.on('value', data => {
+      ballY = data.val()
+    })
 
     // ball
     p5.ellipse(ballX, ballY, BALL_SIZE)
@@ -245,8 +265,6 @@ export default class PongMulti extends React.Component {
         .update(gameData)
     } else if (this.userObj.player2 === this.currentUser) {
       gameData = {
-        ballX,
-        ballY,
         rightRecY
       }
       firebase
