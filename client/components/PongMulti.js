@@ -29,6 +29,7 @@ const SCORE_TEXT_SIZE = 75
 // Speech recognition set up
 var myRec = new p5.SpeechRec()
 myRec.continuous = true
+// myRec.onEnd = myRec.start()
 myRec.interimResults = true
 
 //Speech Recognition Dictionaries
@@ -274,6 +275,7 @@ export default class PongMulti extends React.Component {
     }
     // award points if ball gets passed opponent's paddle
     // then reset ball to center
+    let ballResetData
     if (ballX < BALL_SIZE / 2) {
       this.scoreright++
       ballY = p5.width / 2
