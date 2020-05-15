@@ -278,12 +278,28 @@ export default class PongMulti extends React.Component {
       this.scoreright++
       ballY = p5.width / 2
       ballX = p5.width / 2
+      ballResetData = {
+        ballX,
+        ballY
+      }
+      firebase
+        .database()
+        .ref('/Pong_Rooms/rooms/' + this.roomCode)
+        .update(ballResetData)
       this.passed = false
       angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     } else if (ballX + BALL_SIZE / 2 > p5.width) {
       this.scoreleft++
       ballY = p5.width / 2
       ballX = p5.width / 2
+      ballResetData = {
+        ballX,
+        ballY
+      }
+      firebase
+        .database()
+        .ref('/Pong_Rooms/rooms/' + this.roomCode)
+        .update(ballResetData)
       this.passed = false
       angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
