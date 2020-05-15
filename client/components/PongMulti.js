@@ -4,7 +4,7 @@ import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
 import firebase from 'firebase'
-import user from '../store/user'
+// import user from '../store/user'
 
 //Firebase db connection
 
@@ -46,26 +46,28 @@ let downDictionary = [
   'gown',
   'around'
 ]
-let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey']
+let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey', 'stop']
 
 // global vars
 let ballX, ballY
-let leftRecY
+let leftRecY, rightRecY
 let angle = 1
 let dy
 let currentBallX, currentBallY
+let currentUrl, roomCode, userRef, currentUser, userObj
 
 export default class PongMulti extends React.Component {
   constructor() {
     super()
     this.state = {
       hello: 7,
-      playerOne: false,
+      play: false,
       ballX: 250,
       ballY: 300,
       leftRecY: 300
     }
     this.setup = this.setup.bind(this)
+    this.mouseClicked = this.mouseClicked.bind(this)
     // let currentUrl = window.location.href
     // let roomCode = currentUrl.split('/')[4]
     // let currentUser = firebase.auth().onAuthStateChanged((user) => {
@@ -92,6 +94,11 @@ export default class PongMulti extends React.Component {
   scoreright = 0
   scoreleft = 0
   passed = false
+  currentUrl = window.location.href
+  roomCode = this.currentUrl.split('/')[4]
+  userRef = firebase
+    .database()
+    .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
 
   componentDidMount() {}
 
@@ -99,7 +106,7 @@ export default class PongMulti extends React.Component {
     p5.createCanvas(WIDTH, HEIGHT).parent(canvasParentRef)
     ballX = p5.width / 2
     ballY = p5.height / 2
-    this.state.leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
+    leftRecY = p5.height / 2 - PADDLE_HEIGHT / 2
     dy = 0
 
     p5.textSize(100)
@@ -116,59 +123,85 @@ export default class PongMulti extends React.Component {
       }
     }
     myRec.start()
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.currentUser = user.uid
+        this.userRef.on('value', snap => {
+          this.userObj = snap.val()
+        })
+        console.log(this.userObj, 'userObj')
+        console.log(this.currentUser, 'current User')
+      }
+    })
+
+    p5.noLoop()
   }
 
   draw = p5 => {
     p5.background(220)
-
-    let currentUrl = window.location.href
-    let roomCode = currentUrl.split('/')[4]
-    let user1Ref = firebase
-      .database()
-      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
-    let currentUser = firebase.auth().W
-
-    let userObj
-    user1Ref.on('value', data => {
-      userObj = data.val()
-    })
-    console.log(userObj, 'userObj')
-    console.log(currentUser, 'current User')
-
-    if (userObj.player1 === currentUser) {
+    // this.state.play = false
+    // firebase.auth().onAuthStateChanged((user) => {
+    //   if (user) {
+    //     this.currentUser = user.uid
+    //     let userObj
+    //     this.userRef.on('value', (snap) => {
+    //       userObj = snap.val()
+    //     })
+    //     console.log(userObj, 'userObj')
+    //     console.log(this.currentUser, 'current User')
+    if (this.state.play === false) {
+      return
     }
-    //Make a call to the database about rightRecY and it's location
+    let gameData
+    //Conditional rendering based on who is which player
 
-    let rightRef = firebase
-      .database()
-      .ref('Pong_Rooms/rooms/' + roomCode + '/rightRecY')
-    let rightRecY
+    if (this.userObj.player1 === this.currentUser) {
+      //Make a call to the database about rightRecY and it's location
+      let rightRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/rightRecY')
 
-    rightRef.on('value', data => {
-      rightRecY = data.val()
-    })
+      rightRef.on('value', data => {
+        console.log(
+          data.val(),
+          'are we grabbing the data right here in rightRef?'
+        )
+        rightRecY = data.val()
+      })
+      leftRecY += dy
+    } else if (this.userObj.player2 === this.currentUser) {
+      let leftRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/leftRecY')
+
+      leftRef.on('value', data => {
+        leftRecY = data.val()
+      })
+      rightRecY += dy
+
+      gameData = {
+        ballX,
+        ballY,
+        rightRecY
+      }
+    }
+
     // let rightRecY = ballY - PADDLE_HEIGHT / 2
 
     // left side paddle
-    this.state.leftRecY += dy
-    p5.rect(
-      this.paddleSideMargin,
-      this.state.leftRecY,
-      PADDLE_WIDTH,
-      PADDLE_HEIGHT
-    )
+    p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
 
     // if paddle off bottom screen
-    if (this.state.leftRecY > p5.height - PADDLE_HEIGHT - 10) {
+    if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
       // dy *= -1
-      this.state.leftRecY = p5.height - 10 - PADDLE_HEIGHT
+      leftRecY = p5.height - 10 - PADDLE_HEIGHT
       dy = 0
-    } else if (this.state.leftRecY < 10) {
+    } else if (leftRecY < 10) {
       // dy *= -1
-      this.state.leftRecY = 10
+      leftRecY = 10
       dy = 0
     } else {
-      this.state.leftRecY += dy
+      leftRecY += dy
     }
 
     // right side paddle
@@ -191,20 +224,36 @@ export default class PongMulti extends React.Component {
     ballY += ry
 
     //The values to be updated in Firebase
-    leftRecY = this.state.leftRecY
-    const gameData = {
-      ballX,
-      ballY,
-      leftRecY
-    }
+    // leftRecY = this.state.leftRecY
+    // const gameData = {
+    //   ballX,
+    //   ballY,
+    //   leftRecY,
+    // }
 
     // console.log('are we getting to the update?', firebase.auth())
     //Update the database with the new values
-    firebase
-      .database()
-      .ref('/Pong_Rooms/rooms/' + roomCode)
-      .update(gameData)
-
+    if (this.userObj.player1 === this.currentUser) {
+      gameData = {
+        ballX,
+        ballY,
+        leftRecY
+      }
+      firebase
+        .database()
+        .ref('/Pong_Rooms/rooms/' + this.roomCode)
+        .update(gameData)
+    } else if (this.userObj.player2 === this.currentUser) {
+      gameData = {
+        ballX,
+        ballY,
+        rightRecY
+      }
+      firebase
+        .database()
+        .ref('/Pong_Rooms/rooms/' + this.roomCode)
+        .update(gameData)
+    }
     // award points if ball gets passed opponent's paddle
     // then reset ball to center
     if (ballX < BALL_SIZE / 2) {
@@ -278,14 +327,28 @@ export default class PongMulti extends React.Component {
     // }
   }
 
+  mouseClicked(p5) {
+    this.setState({
+      play: true
+    })
+    p5.loop()
+  }
+
   render() {
     const val = this.state.hello
     return (
       <div>
         <div>
           <h1>{val}</h1>
+          <button type="button" onClick={() => this.mouseClicked()}>
+            Start Game
+          </button>
         </div>
-        <Sketch setup={this.setup} draw={this.draw} />
+        <Sketch
+          mouseClicked={this.mouseClicked}
+          setup={this.setup}
+          draw={this.draw}
+        />
         {/* <button type="button" onClick={playAgain}>
           play again
         </button> */}
