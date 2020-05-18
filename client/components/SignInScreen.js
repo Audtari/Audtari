@@ -34,7 +34,7 @@ export default class SignInScreen extends Component {
     if (!this.state.isSignedIn) {
       return (
         <div>
-          <h1>Audtari</h1>
+          <h1 className="atariFont">Audtari</h1>
           <p>Please sign-in:</p>
           <StyledFirebaseAuth
             uiConfig={uiConfig}
@@ -45,12 +45,14 @@ export default class SignInScreen extends Component {
     }
     return (
       <div>
-        <h1>Audtari</h1>
+        <h1 className="atariFont">Audtari</h1>
         <p>
           Welcome {firebase.auth().currentUser.displayName}! You are now
           signed-in!
         </p>
-        <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
+        <a onClick={() => firebase.auth().signOut()}>
+          <button type="button"> Sign-Out</button>
+        </a>
       </div>
     )
   }
