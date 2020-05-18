@@ -21,9 +21,6 @@ var firebaseConfig = {
 
 var uiConfig = {
   callbacks: {
-    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-      return true
-    },
     uiShown: function() {
       SVGComponentTransferFunctionElement.getElementById(
         'loader'
@@ -34,11 +31,10 @@ var uiConfig = {
   signInFlow: 'popup',
   signInSuccessUrl: '/home',
   signInOptions: [
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
-    }
-  ]
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  ],
+  autoUpgradeAnonymousUsers: true
 }
 
 firebase.initializeApp(firebaseConfig)
