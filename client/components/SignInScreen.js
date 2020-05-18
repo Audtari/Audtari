@@ -50,7 +50,9 @@ export default class SignInScreen extends Component {
           Welcome {firebase.auth().currentUser.displayName}! You are now
           signed-in!
         </p>
-        <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
+        <a onClick={() => firebase.auth().signOut()}>
+          <button type="button"> Sign-Out</button>
+        </a>
       </div>
     )
   }
