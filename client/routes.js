@@ -8,6 +8,7 @@ import Pong from './components/Pong'
 import SpeechTest from './components/SpeechTest'
 import PongMulti from './components/PongMulti'
 import Lobby from './components/Lobby'
+import homePage from './components/homePage'
 
 /**
  * COMPONENT
@@ -28,10 +29,11 @@ class Routes extends Component {
         <Route path="/multi" component={PongMulti} />
         <Route path="/speech" component={SpeechTest} />
         <Route path="/lobby" component={Lobby} />
+        <Route path="/home" component={homePage} />
         {isLoggedIn && (
           <Switch>
             {/* Routes placed here are only available after logging in */}
-            <Route path="/home" component={UserHome} />
+            <Route path="/accountInfo" component={UserHome} />
           </Switch>
         )}
         {/* Displays our Login component as a fallback */}

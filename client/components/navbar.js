@@ -10,9 +10,10 @@ const Navbar = () => (
     <nav>
       <div>
         {/* The navbar will show these links before you log in */}
+        <Link to="/home">Home</Link>
+        <Link to="/accountInfo">Account Info</Link>
         <Link to="/pong">Pong SP</Link>
         <Link to="/lobby">Pong MP</Link>
-        <Link to="/home">Account Info</Link>
       </div>
     </nav>
     <hr />
