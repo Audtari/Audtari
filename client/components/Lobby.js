@@ -11,8 +11,14 @@ export default class Lobby extends React.Component {
   componentDidMount() {
     let roomRef = firebase.database().ref('Pong_Rooms')
     roomRef.on('child_added', data => {
+      let keys = []
       let rooms = data.val()
-      let keys = Object.keys(rooms)
+      console.log('ROOMS', rooms)
+      for (let key in rooms) {
+        if (!rooms[key].private) {
+          keys.push(key)
+        }
+      }
 
       this.setState({
         roomArr: keys
@@ -21,6 +27,8 @@ export default class Lobby extends React.Component {
   }
 
   onClick() {
+    let isPrivate = document.getElementById('private').checked
+    console.log(isPrivate)
     let newRoomKey = firebase
       .database()
       .ref('Pong_Rooms')
@@ -35,7 +43,8 @@ export default class Lobby extends React.Component {
       users: {
         player1: 'user1',
         player2: ''
-      }
+      },
+      private: isPrivate
     }
     const updates = {}
     updates['/rooms/' + newRoomKey] = newRoomData
@@ -43,9 +52,17 @@ export default class Lobby extends React.Component {
       .database()
       .ref('Pong_Rooms')
       .update(updates)
-    this.setState(prevState => ({
-      roomArr: [...prevState.roomArr, newRoomKey]
-    }))
+    window.location.href = `/multi/${newRoomKey}`
+    // if (!isPrivate) {
+    //   this.setState((prevState) => ({
+    //     roomArr: [...prevState.roomArr, newRoomKey],
+    //   }))
+    // }
+  }
+
+  createRoomForm() {
+    let form = document.getElementById('create-room-form')
+    form.style.display = 'block'
   }
 
   onJoin(room) {
@@ -87,6 +104,7 @@ export default class Lobby extends React.Component {
         <h1>This is the Lobby</h1>
         <ul>
           {rooms.map(room => {
+            console.log(room)
             return (
               <div key={room}>
                 <li>{room}</li>{' '}
@@ -98,9 +116,19 @@ export default class Lobby extends React.Component {
           })}
         </ul>
         <div id="Create Button">
-          <button type="button" onClick={() => this.onClick()}>
+          <button type="button" onClick={() => this.createRoomForm()}>
             Create Room
           </button>
+        </div>
+        <div id="create-room-form">
+          <form>
+            <label>Private</label>
+            <input type="checkbox" id="private" />
+            <br />
+            <button type="button" onClick={() => this.onClick()}>
+              Create Room
+            </button>
+          </form>
         </div>
       </div>
     )

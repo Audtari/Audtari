@@ -440,7 +440,7 @@ export default class PongMulti extends React.Component {
         !this.userObj.player1
       ) {
         roomUpdate = {
-          player2: ''
+          player2: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(emptyGameState)
