@@ -403,7 +403,7 @@ export default class PongMulti extends React.Component {
       }
       if (this.userObj.player1 === this.currentUser && !this.userObj.player2) {
         roomUpdate = {
-          player1: ''
+          player1: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(emptyGameState)
@@ -412,7 +412,7 @@ export default class PongMulti extends React.Component {
         this.userObj.player2
       ) {
         roomUpdate = {
-          player1: ''
+          player1: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(waitingGameState)
