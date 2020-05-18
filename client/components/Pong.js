@@ -73,6 +73,8 @@ let leftRecY, rightRecY
 let angle = 1
 let leftDY, rightDY
 
+let speechIsOn = false
+
 //Speech Recognition Dictionaries
 let upDictionary = ['up', 'cup', 'sup', 'pup', 'sup', 'yup']
 let downDictionary = [
@@ -139,7 +141,15 @@ export default class Pong extends React.Component {
         leftDY = 0
       }
     }
-    myRec.start()
+
+    if (!speechIsOn) {
+      myRec.start()
+      speechIsOn = true
+    }
+
+    myRec.onEnd = () => {
+      speechIsOn = !speechIsOn
+    }
   }
 
   draw = p5 => {

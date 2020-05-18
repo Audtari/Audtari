@@ -19,3 +19,35 @@ form div {
   margin: 1em;
   display: inline-block;
 }
+
+@font-face {
+  font-family: atariClassicFont;
+  src: url(AtariClassicChunky-PxXP.ttf);
+}
+
+nav {
+  font-family: atariClassicFont;
+}
+
+.atariFont {
+  font-family: atariClassicFont;
+}
+
+.gradient-text {
+  /* Fallback: Set a background color. */
+  background-color: red;
+
+  /* Create the gradient. */
+  background-image: linear-gradient(45deg, lightgreen, black);
+
+  /* Set the background size and repeat properties. */
+  background-size: 100%;
+  background-repeat: repeat;
+
+  /* Use the text as a mask for the background. */
+  /* This will show the gradient as a text color rather than element bg. */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-background-clip: text;
+  -moz-text-fill-color: transparent;
+}
