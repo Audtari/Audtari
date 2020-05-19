@@ -11,10 +11,10 @@ import firebase from 'firebase'
 // const db = firebase.database()
 
 // Constants
-const BALL_SPEED = 5
+const BALL_SPEED = 3
 const BALL_SIZE = 30
 
-const PADDLE_SPEED = 0.5
+const PADDLE_SPEED = 2
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 
@@ -104,6 +104,9 @@ export default class PongMulti extends React.Component {
     .database()
     .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
   gameState
+  scoreRef = firebase
+    .database()
+    .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores')
 
   componentDidMount() {
     let gameStateRef = firebase
@@ -294,13 +297,16 @@ export default class PongMulti extends React.Component {
       // award points if ball gets passed opponent's paddle
       // then reset ball to center
       let ballResetData
+      let scoreLeftUpdate = this.scoreleft
+      let scoreRightUpdate = this.scoreright
       if (ballX < BALL_SIZE / 2) {
         this.scoreright++
         ballY = p5.width / 2
         ballX = p5.width / 2
         ballResetData = {
           ballX,
-          ballY
+          ballY,
+          scores: {player2Score: scoreRightUpdate}
         }
         firebase
           .database()
@@ -314,7 +320,8 @@ export default class PongMulti extends React.Component {
         ballX = p5.width / 2
         ballResetData = {
           ballX,
-          ballY
+          ballY,
+          scores: {player1Score: scoreLeftUpdate}
         }
         firebase
           .database()
@@ -459,13 +466,29 @@ export default class PongMulti extends React.Component {
 
   render() {
     const val = this.state.hello
+    let userData
+    this.userRef.on('value', function(data) {
+      userData = data.val().player1
+    })
+    let user = this.currentUser || ''
+    console.log(userData, 'user obj?')
+    console.log(this.currentUser, 'current User')
     return (
       <div>
         <div>
-          <h1>{val}</h1>
-          <button type="button" onClick={() => this.mouseClicked()}>
-            Start Game
-          </button>
+          {userData === user ? (
+            <span>You are the left paddle!</span>
+          ) : (
+            <span>You are the right paddle!</span>
+          )}
+        </div>
+        <div>
+          <h3>Control your paddle with your voice:</h3>
+          <ul>
+            <li>Say "Up" to move the paddle up</li>
+            <li>Say "Down" to move the paddle down</li>
+            <li>Say "Stay" to stop the paddle in place</li>
+          </ul>
         </div>
         <Sketch
           mouseClicked={this.mouseClicked}
