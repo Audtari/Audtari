@@ -4,6 +4,8 @@ import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
 import firebase from 'firebase'
+import {Button} from '@material-ui/core'
+import {Alert} from '@material-ui/lab'
 // import user from '../store/user'
 
 //Firebase db connection
@@ -71,6 +73,8 @@ export default class PongMulti extends React.Component {
       ballY: 300
     }
     this.setup = this.setup.bind(this)
+    // this.myRef = React.createRef()
+    // this.copyToClipboard = this.copyToClipboard.bind(this)
     // this.mouseClicked = this.mouseClicked.bind(this)
     // let currentUrl = window.location.href
     // let roomCode = currentUrl.split('/')[4]
@@ -464,6 +468,10 @@ export default class PongMulti extends React.Component {
     }
   }
 
+  // copyToClipboard(roomCode) {
+  //   navigator.clipboard.writeText(roomCode)
+  // }
+
   render() {
     const val = this.state.hello
     let userData
@@ -490,14 +498,21 @@ export default class PongMulti extends React.Component {
             <li>Say "Stay" to stop the paddle in place</li>
           </ul>
         </div>
+        <div>
+          <span>Wanna play with a friend? Send them this code: </span>
+          <span>{this.roomCode}</span>
+          <Button onClick={() => navigator.clipboard.writeText(this.roomCode)}>
+            Copy code
+          </Button>
+        </div>
         <Sketch
           mouseClicked={this.mouseClicked}
           setup={this.setup}
           draw={this.draw}
         />
-        <button type="button" onClick={() => this.backToLobby()}>
+        <Button variant="outlined" onClick={() => this.backToLobby()}>
           Back to the Lobby
-        </button>
+        </Button>
       </div>
     )
   }

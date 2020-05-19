@@ -1,12 +1,22 @@
 import React from 'react'
 import firebase from 'firebase'
+import {
+  Button,
+  Input,
+  ListItem,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogContent
+} from '@material-ui/core'
 
 export default class Lobby extends React.Component {
   constructor() {
     super()
     this.state = {
       roomArr: [],
-      roomInput: ''
+      roomInput: '',
+      open: false
     }
     this.handleChange = this.handleChange.bind(this)
   }
@@ -107,6 +117,14 @@ export default class Lobby extends React.Component {
     this.setState({roomInput: event.target.value})
   }
 
+  handleClickOpen = () => {
+    setOpen(true)
+  }
+
+  handleClose = () => {
+    setOpen(false)
+  }
+
   render() {
     let rooms = this.state.roomArr
     return (
@@ -114,41 +132,63 @@ export default class Lobby extends React.Component {
         <h1>This is the Lobby</h1>
         <label>
           Got a code? Enter it here:
-          <input
+          <Input
             type="text"
             value={this.state.roomInput}
             onChange={this.handleChange}
           />
         </label>
-        <button type="button" onClick={() => this.onJoin(this.state.roomInput)}>
+        <Button
+          variant="outlined"
+          onClick={() => this.onJoin(this.state.roomInput)}
+        >
           Join Room
-        </button>
-        <ul>
+        </Button>
+        <ul className="rooms">
           {rooms.map(room => {
             // console.log(room)
             return (
               <div key={room}>
-                <li>{room}</li>{' '}
-                <button type="button" onClick={() => this.onJoin(room)}>
+                <ListItem>{room}</ListItem>{' '}
+                <Button variant="outlined" onClick={() => this.onJoin(room)}>
                   Join Room
-                </button>
+                </Button>
               </div>
             )
           })}
         </ul>
         <div id="Create Button">
-          <button type="button" onClick={() => this.createRoomForm()}>
+          <Button variant="outlined" onClick={() => this.createRoomForm()}>
             Create Room
-          </button>
+          </Button>
+          {/* <Dialog
+            open={open}
+            // onClose={handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Would you like this to be a public game that others can join or
+                a private game for you and a friend?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" autofocus>
+                Public
+              </Button>
+              <Button color="primary">Private</Button>
+            </DialogActions>
+          </Dialog> */}
         </div>
         <div id="create-room-form">
           <form>
             <label>Private</label>
             <input type="checkbox" id="private" />
             <br />
-            <button type="button" onClick={() => this.onClick()}>
+            <Button type="button" onClick={() => this.onClick()}>
               Create Room
-            </button>
+            </Button>
           </form>
         </div>
       </div>
