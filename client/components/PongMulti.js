@@ -354,7 +354,7 @@ export default class PongMulti extends React.Component {
       ) {
         this.dirx *= -1
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
-        ballX += BALL_SIZE / 2
+        ballX += BALL_SIZE / 2 + 3
       }
 
       let rightPaddleYRange =
@@ -369,7 +369,7 @@ export default class PongMulti extends React.Component {
       ) {
         this.dirx *= -1
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
-        ballX -= BALL_SIZE / 2
+        ballX -= BALL_SIZE / 2 - 3
       }
 
       // show end game screen
