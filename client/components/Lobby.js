@@ -8,9 +8,10 @@ export default class Lobby extends React.Component {
       roomArr: []
     }
   }
+
   componentDidMount() {
-    let roomRef = firebase.database().ref('Pong_Rooms')
-    roomRef.on('child_added', data => {
+    this.roomRef = firebase.database().ref('Pong_Rooms/rooms')
+    this.roomRef.on('value', data => {
       let keys = []
       let rooms = data.val()
       console.log('ROOMS', rooms)
@@ -19,7 +20,7 @@ export default class Lobby extends React.Component {
           keys.push(key)
         }
       }
-
+      console.log('are we getting in this function at all?')
       this.setState({
         roomArr: keys
       })
@@ -39,6 +40,10 @@ export default class Lobby extends React.Component {
       ballY: 250,
       leftRecY: 300,
       rightRecY: 300,
+      scores: {
+        player1Score: 0,
+        player2Score: 0
+      },
       gameState: 'empty',
       users: {
         player1: 'user1',
@@ -97,7 +102,7 @@ export default class Lobby extends React.Component {
   }
 
   render() {
-    // console.log(roomRef, 'this is the roomRef')
+    console.log(this.roomRef, 'this is the roomRef')
 
     let rooms = this.state.roomArr
     return (
