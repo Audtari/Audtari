@@ -5,8 +5,10 @@ export default class Lobby extends React.Component {
   constructor() {
     super()
     this.state = {
-      roomArr: []
+      roomArr: [],
+      roomInput: ''
     }
+    this.handleChange = this.handleChange.bind(this)
   }
 
   componentDidMount() {
@@ -14,7 +16,7 @@ export default class Lobby extends React.Component {
     this.roomRef.on('value', data => {
       let keys = []
       let rooms = data.val()
-      console.log('ROOMS', rooms)
+      // console.log('ROOMS', rooms)
       for (let key in rooms) {
         if (!rooms[key].private) {
           keys.push(key)
@@ -101,16 +103,29 @@ export default class Lobby extends React.Component {
     window.location.href = `/multi/${room}`
   }
 
-  render() {
-    console.log(this.roomRef, 'this is the roomRef')
+  handleChange(event) {
+    this.setState({roomInput: event.target.value})
+  }
 
+  render() {
     let rooms = this.state.roomArr
     return (
       <div>
         <h1>This is the Lobby</h1>
+        <label>
+          Got a code? Enter it here:
+          <input
+            type="text"
+            value={this.state.roomInput}
+            onChange={this.handleChange}
+          />
+        </label>
+        <button type="button" onClick={() => this.onJoin(this.state.roomInput)}>
+          Join Room
+        </button>
         <ul>
           {rooms.map(room => {
-            console.log(room)
+            // console.log(room)
             return (
               <div key={room}>
                 <li>{room}</li>{' '}
