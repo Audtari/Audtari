@@ -459,13 +459,29 @@ export default class PongMulti extends React.Component {
 
   render() {
     const val = this.state.hello
+    let userData
+    this.userRef.on('value', function(data) {
+      userData = data.val().player1
+    })
+    let user = this.currentUser || ''
+    console.log(userData, 'user obj?')
+    console.log(this.currentUser, 'current User')
     return (
       <div>
         <div>
-          <h1>{val}</h1>
-          <button type="button" onClick={() => this.mouseClicked()}>
-            Start Game
-          </button>
+          {userData === user ? (
+            <span>You are the left paddle!</span>
+          ) : (
+            <span>You are the right paddle!</span>
+          )}
+        </div>
+        <div>
+          <h3>Control your paddle with your voice:</h3>
+          <ul>
+            <li>Say "Up" to move the paddle up</li>
+            <li>Say "Down" to move the paddle down</li>
+            <li>Say "Stay" to stop the paddle in place</li>
+          </ul>
         </div>
         <Sketch
           mouseClicked={this.mouseClicked}

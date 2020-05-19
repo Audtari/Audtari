@@ -52,7 +52,8 @@ export default class Lobby extends React.Component {
       .database()
       .ref('Pong_Rooms')
       .update(updates)
-    window.location.href = `/multi/${newRoomKey}`
+    this.onJoin(newRoomKey)
+    // window.location.href = `/multi/${newRoomKey}`
     // if (!isPrivate) {
     //   this.setState((prevState) => ({
     //     roomArr: [...prevState.roomArr, newRoomKey],
