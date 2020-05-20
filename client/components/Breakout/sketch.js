@@ -15,7 +15,7 @@ const WIDTH = 700
 const HEIGHT = 650
 
 const BALL_SIZE = 30
-const MAX_BOUNCE_ANGLE = Math.PI / 4
+const MAX_BOUNCE_ANGLE = Math.PI / 4 // ball will bounce at an angle between PI/4 and 3*PI/4
 
 const PADDLE_WIDTH = 100
 const PADDLE_HEIGHT = PADDLE_WIDTH / 10
