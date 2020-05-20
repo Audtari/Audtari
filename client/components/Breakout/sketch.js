@@ -20,8 +20,8 @@ const MAX_BOUNCE_ANGLE = Math.PI / 4 // ball will bounce at an angle between PI/
 const PADDLE_WIDTH = 100
 const PADDLE_HEIGHT = PADDLE_WIDTH / 10
 
-const BRICKS_PER_ROW = 7
-const BRICKS_PER_COL = 7
+const BRICKS_PER_ROW = 10
+const BRICKS_PER_COL = 10
 const BRICK_WIDTH = (WIDTH - 10 * 2) / BRICKS_PER_ROW
 const BRICK_HEIGHT = BRICK_WIDTH / 4
 
@@ -159,7 +159,6 @@ export default class Breakout extends React.Component {
       ball.setAngle(angle)
     }
 
-    console.log(ball.getXSpeed(), ball.getYSpeed())
     // game over if player loses all lives
     if (playerLives == 0) {
       p5.textSize(100)
@@ -180,11 +179,16 @@ export default class Breakout extends React.Component {
       p5.noLoop()
     }
 
-    // score display
+    // lives display
     p5.textSize(100)
     p5.fill(255)
-    p5.textAlign(p5.CENTER)
-    p5.text('Lives: ' + playerLives, WIDTH / 2, HEIGHT / 2)
+    // p5.textAlign(p5.CENTER)
+    p5.text('Lives:', WIDTH / 4, HEIGHT / 2)
+
+    for (let i = 0; i < playerLives; i++) {
+      p5.fill(255, 0, 0)
+      heart(2 * WIDTH / 3 + i * 70, 3 * HEIGHT / 7, 40, p5)
+    }
 
     // bricks remaining display
     // p5.textSize(35)
@@ -199,4 +203,19 @@ export default class Breakout extends React.Component {
       </div>
     )
   }
+}
+
+function heart(x, y, size, p5) {
+  p5.beginShape()
+  p5.vertex(x, y)
+  p5.bezierVertex(
+    x - size / 2,
+    y - size / 2,
+    x - size,
+    y + size / 3,
+    x,
+    y + size
+  )
+  p5.bezierVertex(x + size, y + size / 3, x + size / 2, y - size / 2, x, y)
+  p5.endShape(p5.CLOSE)
 }

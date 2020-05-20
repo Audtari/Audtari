@@ -69,14 +69,6 @@ export default class Ball {
     this.angle = angle
   }
 
-  getXSpeed() {
-    return ballXspeed
-  }
-
-  getYSpeed() {
-    return ballYspeed
-  }
-
   setSpeed() {
     if (ballXspeed < 0) {
       ballXspeed *= -1
