@@ -14,8 +14,8 @@ Class Params:
 
 // # of pixels per frame that the balls x and y coordinates will change (i.e. the balls speed)
 // Note: these are not constants bc their direction will change (i.e. *= -1)
-let ballXspeed = 8
-let ballYspeed = 8
+let ballXspeed = 4
+let ballYspeed = 4
 
 export default class Ball {
   constructor(x, y, size, p5) {
@@ -23,7 +23,8 @@ export default class Ball {
     this.y = y
     this.size = size
 
-    this.angle = p5.random(p5.PI / 4, 3 * p5.PI / 4) // initial movement angle is random
+    // this.angle = p5.random(p5.PI / 4, (3 * p5.PI) / 4) // initial movement angle is random
+    this.angle = 1 * Math.PI / 4
 
     this.p5 = p5 // we need p5 from sketch
   }
@@ -66,6 +67,20 @@ export default class Ball {
   // set movement angle
   setAngle(angle) {
     this.angle = angle
+  }
+
+  getXSpeed() {
+    return ballXspeed
+  }
+
+  getYSpeed() {
+    return ballYspeed
+  }
+
+  setSpeed() {
+    if (ballXspeed < 0) {
+      ballXspeed *= -1
+    }
   }
 
   // display the ball on the canvas

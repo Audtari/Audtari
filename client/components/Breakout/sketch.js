@@ -133,8 +133,8 @@ export default class Breakout extends React.Component {
       ball.setY()
     } else if (ball.getY() - BALL_SIZE / 2 >= HEIGHT) {
       ball.setPos(WIDTH / 2, HEIGHT / 2)
-      angle = p5.random(p5.PI / 4, 3 * p5.PI / 4)
-      ball.setAngle(angle)
+      // angle = p5.random(p5.PI / 4, (3 * p5.PI) / 4)
+      // ball.setAngle(angle)
       playerLives--
     }
 
@@ -150,16 +150,16 @@ export default class Breakout extends React.Component {
     // bounce ball when it hits paddle
     if (inXRange && inYRange && !passed) {
       ball.setY()
-      console.log()
-
       // bounce angle is relative to collision point
       let rel = paddle.getX() + PADDLE_WIDTH - ball.getX()
       rel = rel / PADDLE_WIDTH * 2 + 1
       angle = rel * MAX_BOUNCE_ANGLE
 
+      ball.setSpeed()
       ball.setAngle(angle)
     }
 
+    console.log(ball.getXSpeed(), ball.getYSpeed())
     // game over if player loses all lives
     if (playerLives == 0) {
       p5.textSize(100)
