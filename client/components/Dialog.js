@@ -20,6 +20,36 @@ export default function AlertDialog(props) {
     setOpen(false)
   }
 
+  const onJoin = room => {
+    let currentUser
+    if (!firebase.auth().currentUser) {
+      currentUser = firebase.auth().signInAnonymously()
+    } else {
+      currentUser = firebase.auth().currentUser.uid
+    }
+    console.log('CURRENT USER', currentUser)
+    let checkForPlayersRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + room + '/users')
+    const updates = {}
+    let userObj
+    checkForPlayersRef.once('value', data => {
+      userObj = data.val()
+    })
+    if (userObj.player1 === 'user1') {
+      updates['/rooms/' + room + '/users/player1'] = currentUser
+      updates['/rooms/' + room + '/gameState'] = 'waiting'
+    } else {
+      updates['/rooms/' + room + '/users/player2'] = currentUser
+      updates['/rooms/' + room + '/gameState'] = 'active'
+    }
+    firebase
+      .database()
+      .ref('Pong_Rooms')
+      .update(updates)
+    window.location.href = `/multi/${room}`
+  }
+
   const newRoom = val => {
     setOpen(false)
     let isPrivate = val
@@ -44,14 +74,36 @@ export default function AlertDialog(props) {
       },
       private: isPrivate
     }
+    let currentUser
+    if (!firebase.auth().currentUser) {
+      currentUser = firebase.auth().signInAnonymously()
+    } else {
+      currentUser = firebase.auth().currentUser.uid
+    }
+    console.log('CURRENT USER', currentUser)
+    let checkForPlayersRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + newRoomKey + '/users')
     const updates = {}
+    let userObj
+    checkForPlayersRef.once('value', data => {
+      userObj = data.val()
+    })
+    if (userObj.player1 === 'user1') {
+      updates['/rooms/' + newRoomKey + '/users/player1'] = currentUser
+      updates['/rooms/' + newRoomKey + '/gameState'] = 'waiting'
+    } else {
+      updates['/rooms/' + newRoomKey + '/users/player2'] = currentUser
+      updates['/rooms/' + newRoomKey + '/gameState'] = 'active'
+    }
+    // const updates = {}
     updates['/rooms/' + newRoomKey] = newRoomData
     firebase
       .database()
       .ref('Pong_Rooms')
       .update(updates)
     console.log(props, 'props from the Dialog')
-    props.onJoin(newRoomKey)
+    // onJoin(newRoomKey)
   }
 
   return (
@@ -75,7 +127,7 @@ export default function AlertDialog(props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={newRoom(false)} color="primary">
             Public
           </Button>
           <Button onClick={handleClose} color="primary" autoFocus>
