@@ -84,8 +84,8 @@ export default class Breakout extends React.Component {
 
       if (inXRange && inYRange) {
         console.log('hit', bricks[i].getX(), bricks[i].getY())
-        bricks.splice(i, 1)
         ball.setY()
+        bricks.splice(i, 1)
       }
     }
 
@@ -148,7 +148,7 @@ export default class Breakout extends React.Component {
     p5.text('Lives: ' + playerLives, WIDTH / 2, HEIGHT / 2)
 
     p5.textSize(35)
-    p5.text('Bricks Left: ' + bricks.length, WIDTH / 2, HEIGHT / 4)
+    p5.text('Bricks Left: ' + bricks.length, WIDTH / 2, 3 * HEIGHT / 5)
   }
 
   render() {

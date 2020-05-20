@@ -40,17 +40,4 @@ export default class Brick {
   getWidth() {
     return this.width
   }
-
-  //   hit(ball) {
-  //     let inXRange =
-  //       ball.getX() + 30 / 2 >= this.x &&
-  //       ball.getX() - 30 / 2 <= this.x + this.width
-
-  //     let inYRange = ball.getY() - 30 / 2 <= this.y + this.height
-
-  //     if (inXRange && inYRange) {
-  //       console.log('hit')
-
-  //     }
-  //   }
 }
