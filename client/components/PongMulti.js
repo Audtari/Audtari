@@ -371,8 +371,7 @@ export default class PongMulti extends React.Component {
       }
 
       let leftPaddleYRange =
-        ballY > this.state.leftRecY &&
-        ballY < this.state.leftRecY + PADDLE_HEIGHT
+        ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
 
       // if ball hits left then paddle bounce off
       if (
