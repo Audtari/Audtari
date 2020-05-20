@@ -4,6 +4,7 @@
 import React from 'react'
 import Sketch from 'react-p5'
 import '../../../script/lib/p5.speech'
+import p5 from 'p5'
 
 // classes
 import Ball from './Ball'
@@ -20,8 +21,8 @@ const MAX_BOUNCE_ANGLE = Math.PI / 4 // ball will bounce at an angle between PI/
 const PADDLE_WIDTH = 100
 const PADDLE_HEIGHT = PADDLE_WIDTH / 10
 
-const BRICKS_PER_ROW = 10
-const BRICKS_PER_COL = 10
+const BRICKS_PER_ROW = 7
+const BRICKS_PER_COL = 7
 const BRICK_WIDTH = (WIDTH - 10 * 2) / BRICKS_PER_ROW
 const BRICK_HEIGHT = BRICK_WIDTH / 4
 
@@ -33,7 +34,23 @@ let bricks = []
 let playerLives = 3 // player's starting lives
 let hit = false // tracks brick collisions per cycle
 
-let angle
+let angle // the ball's angle of movement
+
+let speechIsOn = false
+
+let paddleDY
+
+const PADDLE_SPEED = 5
+
+//Speech Recognition Dictionaries
+let rightDictionary = ['right', 'bright', 'light', 'write', 'rate', 'great']
+let leftDictionary = ['left', 'let', "let's"]
+let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey']
+
+// Speech recognition set up
+var myRec = new p5.SpeechRec()
+myRec.continuous = true
+myRec.interimResults = true
 
 export default class Breakout extends React.Component {
   setup(p5) {
@@ -51,6 +68,8 @@ export default class Breakout extends React.Component {
       p5
     )
 
+    paddleDY = 0
+
     // instantiate all bricks
     for (let i = 0; i < BRICKS_PER_ROW; i++) {
       for (let j = 0; j < BRICKS_PER_COL; j++) {
@@ -65,6 +84,27 @@ export default class Breakout extends React.Component {
         )
       }
     }
+
+    myRec.onResult = () => {
+      console.log(myRec)
+      var mostrecentword = myRec.resultString.split(' ').pop()
+      if (leftDictionary.indexOf(mostrecentword) !== -1) {
+        paddleDY = -PADDLE_SPEED
+      } else if (rightDictionary.indexOf(mostrecentword) !== -1) {
+        paddleDY = PADDLE_SPEED
+      } else if (stayDictionary.indexOf(mostrecentword) !== -1) {
+        paddleDY = 0
+      }
+    }
+
+    if (!speechIsOn) {
+      myRec.start()
+      speechIsOn = true
+    }
+
+    myRec.onEnd = () => {
+      speechIsOn = !speechIsOn
+    }
   }
 
   draw = p5 => {
@@ -73,13 +113,37 @@ export default class Breakout extends React.Component {
     p5.strokeWeight(0)
     p5.fill(255)
 
+    // lives display
+    p5.textSize(100)
+    p5.fill(255)
+    // p5.textAlign(p5.CENTER)
+
+    if (playerLives > 0) {
+      p5.text('Lives:', WIDTH / 4, HEIGHT / 2)
+    }
+
+    for (let i = 0; i < playerLives; i++) {
+      p5.fill(255, 0, 0)
+      heart(2 * WIDTH / 3 + i * 70, 3 * HEIGHT / 7, 40, p5)
+    }
+
+    // bricks remaining display
+    // p5.textSize(35)
+    // p5.text('Bricks Remaining: ' + bricks.length, WIDTH / 2, (3 * HEIGHT) / 5)
+
     // display and move ball
     ball.show()
     ball.update()
 
     // display and move paddle
     paddle.show()
-    paddle.setX(p5.mouseX - PADDLE_WIDTH / 2)
+    // paddle.setX(p5.mouseX - PADDLE_WIDTH / 2)
+
+    if (paddle.getX() > WIDTH / 2) {
+      paddle.setX(Math.min(paddle.getX() + paddleDY, WIDTH - PADDLE_WIDTH - 5))
+    } else {
+      paddle.setX(Math.max(paddle.getX() + paddleDY, 10))
+    }
 
     // display bricks
     bricks.forEach(brick => brick.show())
@@ -178,21 +242,6 @@ export default class Breakout extends React.Component {
       p5.text('YOU WIN!', 350, 420)
       p5.noLoop()
     }
-
-    // lives display
-    p5.textSize(100)
-    p5.fill(255)
-    // p5.textAlign(p5.CENTER)
-    p5.text('Lives:', WIDTH / 4, HEIGHT / 2)
-
-    for (let i = 0; i < playerLives; i++) {
-      p5.fill(255, 0, 0)
-      heart(2 * WIDTH / 3 + i * 70, 3 * HEIGHT / 7, 40, p5)
-    }
-
-    // bricks remaining display
-    // p5.textSize(35)
-    // p5.text('Bricks Remaining: ' + bricks.length, WIDTH / 2, (3 * HEIGHT) / 5)
   }
 
   render() {

@@ -14,6 +14,7 @@ const Navbar = () => (
         <Link to="/accountInfo">Account Info</Link>
         <Link to="/pong">Pong SP</Link>
         <Link to="/lobby">Pong MP</Link>
+        <Link to="/br">Breakout</Link>
       </div>
     </nav>
     <hr />
