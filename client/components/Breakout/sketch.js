@@ -16,7 +16,7 @@ const HEIGHT = 650
 
 const BALL_SIZE = 30
 
-const PADDLE_WIDTH = 125
+const PADDLE_WIDTH = 100
 const PADDLE_HEIGHT = PADDLE_WIDTH / 6
 
 const MAX_BOUNCE_ANGLE = Math.PI / 4
@@ -32,6 +32,8 @@ let paddle
 let playerLives = 3
 
 let bricks = []
+
+let hit = false
 
 export default class Breakout extends React.Component {
   setup(p5, canvasParentRef) {
@@ -77,17 +79,42 @@ export default class Breakout extends React.Component {
 
     for (let i = 0; i < bricks.length; i++) {
       let inXRange =
-        ball.getX() + BRICK_WIDTH / 2 >= bricks[i].getX() &&
-        ball.getX() - BRICK_WIDTH / 2 <= bricks[i].getX() + bricks[i].getWidth()
+        ball.getX() + BALL_SIZE / 2 >= bricks[i].getX() &&
+        ball.getX() - BALL_SIZE / 2 <= bricks[i].getX() + bricks[i].getWidth()
 
-      let inYRange = ball.getY() - 30 / 2 <= bricks[i].getY() + 25
+      let inYRange =
+        ball.getY() - BALL_SIZE / 2 <= bricks[i].getY() + BRICK_HEIGHT
 
-      if (inXRange && inYRange) {
-        console.log('hit', bricks[i].getX(), bricks[i].getY())
-        ball.setY()
+      let leftSideX =
+        ball.getX() + BALL_SIZE / 2 >= bricks[i].getX() &&
+        ball.getX() + BALL_SIZE / 2 <= bricks[i].getX() + 5
+
+      let leftSideY =
+        ball.getY() <= bricks[i].getY() + BRICK_HEIGHT &&
+        ball.getY() >= bricks[i].getY()
+
+      let rightSideX =
+        ball.getX() - BALL_SIZE / 2 <= bricks[i].getX() + BRICK_WIDTH &&
+        ball.getX() + BALL_SIZE / 2 >= bricks[i].getX() + BRICK_WIDTH + 5
+
+      if (leftSideX && leftSideY) {
         bricks.splice(i, 1)
+
+        if (!hit) ball.setX()
+
+        hit = true
+      } else if (inXRange && inYRange) {
+        bricks.splice(i, 1)
+        if (!hit) ball.setY()
+        hit = true
+      } else if (rightSideX && leftSideY) {
+        bricks.splice(i, 1)
+        if (!hit) ball.setX()
+        hit = true
       }
     }
+
+    hit = false
 
     if (ball.getX() - BALL_SIZE / 2 <= 0) {
       // if the ball hits the left, right, or top of screen then bounce off
@@ -111,6 +138,7 @@ export default class Breakout extends React.Component {
     // bounce ball when it hits paddle
     if (inXRange && inYRange) {
       ball.setY()
+      console.log()
 
       let rel = paddle.getX() + PADDLE_WIDTH - ball.getX()
       rel = rel / PADDLE_WIDTH * 2 + 1
