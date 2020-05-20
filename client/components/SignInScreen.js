@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import firebase from 'firebase'
+import {Button} from '@material-ui/core'
 
 var uiConfig = {
   signInFlow: 'popup',
@@ -51,7 +52,7 @@ export default class SignInScreen extends Component {
           signed-in!
         </p>
         <a onClick={() => firebase.auth().signOut()}>
-          <button type="button"> Sign-Out</button>
+          <Button variant="outlined"> Sign-Out</Button>
         </a>
       </div>
     )

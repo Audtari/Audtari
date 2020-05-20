@@ -1,12 +1,36 @@
 import React from 'react'
 import firebase from 'firebase'
+import {
+  Button,
+  Input,
+  ListItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
+  TextField,
+  List,
+  ListItemText
+} from '@material-ui/core'
+// import AlertDialog from './Dialog'
 
 export default class Lobby extends React.Component {
   constructor() {
     super()
     this.state = {
-      rooms: {}
+      roomArr: [],
+      roomInput: '',
+      open: false,
+      roomType: false,
+      roomName: ''
     }
+    this.handleChange = this.handleChange.bind(this)
+    this.handleNameChange = this.handleNameChange.bind(this)
+    this.handleClose = this.handleClose.bind(this)
+    this.handleClickOpen = this.handleClickOpen.bind(this)
+    this.onClick = this.onClick.bind(this)
+    this.handleListItemClick = this.handleListItemClick.bind(this)
   }
 
   componentDidMount() {
@@ -14,32 +38,31 @@ export default class Lobby extends React.Component {
     this.roomRef.on('value', data => {
       let rooms = data.val()
 
-      // for (let key in rooms) {
-      //   if (!rooms[key].private) {
-      //     if (rooms[key].name) {
-      //       keys.push(rooms[key].name)
-      //     } else {
-      //       keys.push(key)
-      //     }
-      //   }
-      // }
       this.setState({
-        rooms: rooms
+        roomArr: rooms
       })
+      // console.log('ROOMS', rooms)
+      console.log('are we getting in this function at all?')
+      // this.setState({
+      //   roomArr: keys,
+      // })
     })
   }
 
   onClick() {
-    let isPrivate = document.getElementById('private').checked
-    let name = document.getElementById('roomName').value
+    let isPrivate = document.getElementById('roomName').value
+    // let privateBool = bool
+    console.log(isPrivate)
 
+    this.setState({
+      open: false
+    })
     let newRoomKey = firebase
       .database()
       .ref('Pong_Rooms')
       .child('/rooms')
       .push().key
     const newRoomData = {
-      name: name,
       ballX: 300,
       ballY: 250,
       leftRecY: 300,
@@ -53,7 +76,8 @@ export default class Lobby extends React.Component {
         player1: 'user1',
         player2: ''
       },
-      private: isPrivate
+      name: this.state.roomName,
+      private: this.state.roomType
     }
     const updates = {}
     updates['/rooms/' + newRoomKey] = newRoomData
@@ -104,38 +128,165 @@ export default class Lobby extends React.Component {
     window.location.href = `/multi/${room}`
   }
 
+  handleChange(event) {
+    this.setState({roomInput: event.target.value})
+  }
+
+  handleNameChange(event) {
+    this.setState({roomName: event.target.value})
+  }
+
+  setOpen(val) {
+    this.setState({
+      open: val
+    })
+  }
+
+  handleClickOpen() {
+    this.setState({
+      open: true
+    })
+  }
+
+  handleClose() {
+    this.setState({
+      open: false
+    })
+  }
+
+  handleListItemClick(string) {
+    if (string === 'public') {
+      this.setState({
+        roomType: false
+      })
+    } else {
+      this.setState({
+        roomType: true
+      })
+    }
+  }
+
   render() {
-    let rooms = this.state.rooms
+    let rooms = this.state.roomArr
     let keys = []
     for (let key in rooms) {
       if (!rooms[key].private) {
-        if (rooms[key].name) {
-          keys.push(rooms[key].name)
-        } else {
-          keys.push(key)
-        }
+        keys.push(key)
       }
     }
     return (
       <div>
         <h1>This is the Lobby</h1>
-        <ul>
+        <label>
+          Got a code? Enter it here:
+          <Input
+            type="text"
+            value={this.state.roomInput}
+            onChange={this.handleChange}
+          />
+        </label>
+        <Button
+          variant="outlined"
+          onClick={() => this.onJoin(this.state.roomInput)}
+        >
+          Join Room
+        </Button>
+        <ul className="rooms">
           {keys.map(room => {
+            // console.log(room)
             return (
               <div key={room}>
-                <li>{room}</li>{' '}
-                <button type="button" onClick={() => this.onJoin(room)}>
+                <ListItem>{rooms[room].name}</ListItem>{' '}
+                <Button variant="outlined" onClick={() => this.onJoin(room)}>
                   Join Room
-                </button>
+                </Button>
               </div>
             )
           })}
         </ul>
-        <div id="Create Button">
-          <button type="button" onClick={() => this.createRoomForm()}>
+        {/* <div id="Create Button">
+          <Button variant="outlined" onClick={() => this.createRoomForm()}>
             Create Room
-          </button>
+          </Button>
+        </div> */}
+        <div>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={this.handleClickOpen}
+          >
+            Create Room
+          </Button>
+          <Dialog
+            open={this.state.open}
+            onClose={this.handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              {'What kind of room are you creating?'}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Would you like this to be a public game that others can join or
+                a private game for you and a friend?
+              </DialogContentText>
+              <List>
+                <ListItem
+                  button
+                  onClick={() => this.handleListItemClick('public')}
+                >
+                  <ListItemText primary="Public" />
+                </ListItem>
+                <ListItem
+                  button
+                  onClick={() => this.handleListItemClick('private')}
+                >
+                  <ListItemText primary="Private" />
+                </ListItem>
+              </List>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="roomName"
+                label="Room Name"
+                type="name"
+                fullWidth
+                value={this.state.roomName}
+                onChange={this.handleNameChange}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.onClick} color="primary">
+                Create my Room
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
+        {/* <AlertDialog
+            open={open}
+            // onJoin={this.onJoin}
+            // onClick={this.onClick}
+          /> */}
+        {/* <Dialog
+            open={open}
+            // onClose={handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Would you like this to be a public game that others can join or
+                a private game for you and a friend?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" autofocus>
+                Public
+              </Button>
+              <Button color="primary">Private</Button>
+            </DialogActions>
+          </Dialog> */}
         <div id="create-room-form">
           <form>
             <label>Private?</label>
@@ -143,9 +294,9 @@ export default class Lobby extends React.Component {
             <label>RoomCode</label>
             <input type="text" id="roomName" />
             <br />
-            <button type="button" onClick={() => this.onClick()}>
+            <Button type="button" onClick={() => this.onClick()}>
               Create Room
-            </button>
+            </Button>
           </form>
         </div>
       </div>
