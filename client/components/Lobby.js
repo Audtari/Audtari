@@ -1,22 +1,14 @@
 import React from 'react'
 import firebase from 'firebase'
-import {
-  Button,
-  Input,
-  ListItem,
-  Dialog,
-  DialogActions,
-  DialogContentText,
-  DialogContent
-} from '@material-ui/core'
+import {Button, Input, ListItem} from '@material-ui/core'
+import AlertDialog from './Dialog'
 
 export default class Lobby extends React.Component {
   constructor() {
     super()
     this.state = {
       roomArr: [],
-      roomInput: '',
-      open: false
+      roomInput: ''
     }
     this.handleChange = this.handleChange.bind(this)
   }
@@ -117,14 +109,6 @@ export default class Lobby extends React.Component {
     this.setState({roomInput: event.target.value})
   }
 
-  handleClickOpen = () => {
-    setOpen(true)
-  }
-
-  handleClose = () => {
-    setOpen(false)
-  }
-
   render() {
     let rooms = this.state.roomArr
     return (
@@ -161,6 +145,11 @@ export default class Lobby extends React.Component {
           <Button variant="outlined" onClick={() => this.createRoomForm()}>
             Create Room
           </Button>
+          <AlertDialog
+            open={open}
+            onJoin={this.onJoin}
+            // onClick={this.onClick}
+          />
           {/* <Dialog
             open={open}
             // onClose={handleClose}
