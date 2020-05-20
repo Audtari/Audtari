@@ -261,16 +261,16 @@ export default class PongMulti extends React.Component {
 
       let leftScoreRef = firebase
         .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores/player1Score')
+        .ref('Pong_Rooms/rooms/' + roomCode + '/scores/player1Score')
       let rightScoreRef = firebase
         .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores/player2Score')
+        .ref('Pong_Rooms/rooms/' + roomCode + '/scores/player2Score')
 
       leftScoreRef.on('value', data => {
-        this.scoreleft = data.val()
+        scoreLeft = data.val()
       })
       rightScoreRef.on('value', data => {
-        this.scoreright = data.val()
+        scoreRight = data.val()
       })
       // ball
       p5.ellipse(ballX, ballY, BALL_SIZE)
@@ -504,8 +504,8 @@ export default class PongMulti extends React.Component {
         </div>
         <div>
           <span>Wanna play with a friend? Send them this code: </span>
-          <span>{this.roomCode}</span>
-          <Button onClick={() => navigator.clipboard.writeText(this.roomCode)}>
+          <span>{roomCode}</span>
+          <Button onClick={() => navigator.clipboard.writeText(roomCode)}>
             Copy code
           </Button>
         </div>
