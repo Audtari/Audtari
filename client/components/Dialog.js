@@ -75,10 +75,10 @@ export default function AlertDialog(props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={newRoom(false)} color="primary">
+          <Button onClick={handleClose} color="primary">
             Public
           </Button>
-          <Button onClick={newRoom(true)} color="primary" autoFocus>
+          <Button onClick={handleClose} color="primary" autoFocus>
             Private
           </Button>
         </DialogActions>
