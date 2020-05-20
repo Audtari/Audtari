@@ -259,6 +259,19 @@ export default class PongMulti extends React.Component {
         ballY = data.val()
       })
 
+      let leftScoreRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores/player1Score')
+      let rightScoreRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores/player2Score')
+
+      leftScoreRef.on('value', data => {
+        this.scoreleft = data.val()
+      })
+      rightScoreRef.on('value', data => {
+        this.scoreright = data.val()
+      })
       // ball
       p5.ellipse(ballX, ballY, BALL_SIZE)
 
@@ -301,8 +314,13 @@ export default class PongMulti extends React.Component {
       // award points if ball gets passed opponent's paddle
       // then reset ball to center
       let ballResetData
-      let scoreLeftUpdate = this.scoreleft
-      let scoreRightUpdate = this.scoreright
+      // let databaseScore
+      // this.scoreRef.once('value', (data) => {
+      //   console.log(data.val(), 'data.val in score Ref')
+      //   databaseScore = data.val()
+      // })
+      // this.scoreleft = databaseScore.scoreleft
+      // this.scoreright = databaseScore.scoreright
       if (ballX < BALL_SIZE / 2) {
         this.scoreright++
         ballY = p5.width / 2
@@ -310,7 +328,10 @@ export default class PongMulti extends React.Component {
         ballResetData = {
           ballX,
           ballY,
-          scores: {player2Score: scoreRightUpdate}
+          scores: {
+            player1Score: this.scoreleft,
+            player2Score: this.scoreright
+          }
         }
         firebase
           .database()
@@ -325,7 +346,10 @@ export default class PongMulti extends React.Component {
         ballResetData = {
           ballX,
           ballY,
-          scores: {player1Score: scoreLeftUpdate}
+          scores: {
+            player1Score: this.scoreleft,
+            player2Score: this.scoreright
+          }
         }
         firebase
           .database()
