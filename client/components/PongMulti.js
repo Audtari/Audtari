@@ -401,25 +401,19 @@ export default class PongMulti extends React.Component {
       if (this.scoreleft == MAX_SCORE) {
         p5.textSize(50)
         p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-
-        // show end game screen
-        if (this.scoreleft == MAX_SCORE) {
-          p5.textSize(50)
-          p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-          this.setState({
-            play: false,
-            gameOver: true
-          })
-          p5.noLoop()
-        } else if (this.scoreright == MAX_SCORE) {
-          p5.textSize(50)
-          p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
-          this.setState({
-            play: false,
-            gameOver: true
-          })
-          p5.noLoop()
-        }
+        this.setState({
+          play: false,
+          gameOver: true
+        })
+        p5.noLoop()
+      } else if (this.scoreright == MAX_SCORE) {
+        p5.textSize(50)
+        p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
+        this.setState({
+          play: false,
+          gameOver: true
+        })
+        p5.noLoop()
       }
     }
   }
