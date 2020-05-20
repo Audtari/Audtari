@@ -5,37 +5,41 @@ export default class Lobby extends React.Component {
   constructor() {
     super()
     this.state = {
-      roomArr: []
+      rooms: {}
     }
   }
 
   componentDidMount() {
     this.roomRef = firebase.database().ref('Pong_Rooms/rooms')
     this.roomRef.on('value', data => {
-      let keys = []
       let rooms = data.val()
-      console.log('ROOMS', rooms)
-      for (let key in rooms) {
-        if (!rooms[key].private) {
-          keys.push(key)
-        }
-      }
-      console.log('are we getting in this function at all?')
+
+      // for (let key in rooms) {
+      //   if (!rooms[key].private) {
+      //     if (rooms[key].name) {
+      //       keys.push(rooms[key].name)
+      //     } else {
+      //       keys.push(key)
+      //     }
+      //   }
+      // }
       this.setState({
-        roomArr: keys
+        rooms: rooms
       })
     })
   }
 
   onClick() {
     let isPrivate = document.getElementById('private').checked
-    console.log(isPrivate)
+    let name = document.getElementById('roomName').value
+
     let newRoomKey = firebase
       .database()
       .ref('Pong_Rooms')
       .child('/rooms')
       .push().key
     const newRoomData = {
+      name: name,
       ballX: 300,
       ballY: 250,
       leftRecY: 300,
@@ -78,7 +82,6 @@ export default class Lobby extends React.Component {
     } else {
       currentUser = firebase.auth().currentUser.uid
     }
-    console.log('CURRENT USER', currentUser)
     let checkForPlayersRef = firebase
       .database()
       .ref('Pong_Rooms/rooms/' + room + '/users')
@@ -102,15 +105,22 @@ export default class Lobby extends React.Component {
   }
 
   render() {
-    console.log(this.roomRef, 'this is the roomRef')
-
-    let rooms = this.state.roomArr
+    let rooms = this.state.rooms
+    let keys = []
+    for (let key in rooms) {
+      if (!rooms[key].private) {
+        if (rooms[key].name) {
+          keys.push(rooms[key].name)
+        } else {
+          keys.push(key)
+        }
+      }
+    }
     return (
       <div>
         <h1>This is the Lobby</h1>
         <ul>
-          {rooms.map(room => {
-            console.log(room)
+          {keys.map(room => {
             return (
               <div key={room}>
                 <li>{room}</li>{' '}
@@ -128,8 +138,10 @@ export default class Lobby extends React.Component {
         </div>
         <div id="create-room-form">
           <form>
-            <label>Private</label>
+            <label>Private?</label>
             <input type="checkbox" id="private" />
+            <label>RoomCode</label>
+            <input type="text" id="roomName" />
             <br />
             <button type="button" onClick={() => this.onClick()}>
               Create Room

@@ -17,6 +17,7 @@ const BALL_SIZE = 30
 const PADDLE_SPEED = 2
 const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
+const PADDLE_SIDE_MARGIN = 10
 
 const MAX_SCORE = 10
 
@@ -29,7 +30,6 @@ const SCORE_TEXT_SIZE = 75
 // Speech recognition set up
 var myRec = new p5.SpeechRec()
 myRec.continuous = true
-// myRec.onEnd = myRec.start()
 myRec.interimResults = true
 
 //Speech Recognition Dictionaries
@@ -50,21 +50,27 @@ let downDictionary = [
 let stayDictionary = ['stay', 'say', 'play', 'flay', 'grey', 'stop']
 
 // global vars
+let scoreLeft = 0
+let scoreRight = 0
+let dirx = 1
+let diry = 1
 let ballX, ballY
 let leftRecY, rightRecY
 let angle = 1
 let dy
 let timer = 300
 let text
-let currentBallX, currentBallY
-let currentUrl, roomCode, userRef, currentUser, userObj
+let roomCode = window.location.href.split('/')[4]
+
+let currentUser
+let player1, player2
+let gameState
 
 export default class PongMulti extends React.Component {
   constructor() {
     super()
     this.state = {
       hello: 7,
-      gameState: '',
       play: false,
       gameOver: false,
       ballX: 250,
@@ -92,28 +98,19 @@ export default class PongMulti extends React.Component {
     // console.log(currentUser, 'current User')
   }
 
-  paddleSideMargin = 10
-  dirx = 1
-  diry = 1
-  scoreright = 0
-  scoreleft = 0
   passed = false
-  currentUrl = window.location.href
-  roomCode = this.currentUrl.split('/')[4]
-  userRef = firebase
-    .database()
-    .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
-  gameState
-  scoreRef = firebase
-    .database()
-    .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores')
+  // userRef = firebase
+  //   .database()
+  //   .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
+  scoreRef = firebase.database().ref('Pong_Rooms/rooms/' + roomCode + '/scores')
 
   componentDidMount() {
     let gameStateRef = firebase
       .database()
-      .ref('Pong_Rooms/rooms/' + this.roomCode + '/gameState')
+      .ref('Pong_Rooms/rooms/' + roomCode + '/gameState')
     gameStateRef.on('value', data => {
-      this.setState({gameState: data.val()})
+      // this.setState({gameState: data.val()})
+      gameState = data.val()
     })
   }
 
@@ -128,7 +125,6 @@ export default class PongMulti extends React.Component {
     p5.textSize(100)
 
     myRec.onResult = () => {
-      console.log(myRec)
       var mostrecentword = myRec.resultString.split(' ').pop()
       if (upDictionary.indexOf(mostrecentword) !== -1) {
         dy = -PADDLE_SPEED
@@ -138,15 +134,19 @@ export default class PongMulti extends React.Component {
         dy = 0
       }
     }
+
     myRec.start()
+
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        this.currentUser = user.uid
-        this.userRef.on('value', snap => {
-          this.userObj = snap.val()
-        })
-        console.log(this.userObj, 'userObj')
-        console.log(this.currentUser, 'current User')
+        currentUser = user.uid
+        firebase
+          .database()
+          .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+          .on('value', snap => {
+            player1 = snap.val().player1
+            player2 = snap.val().player2
+          })
       }
     })
 
@@ -166,7 +166,7 @@ export default class PongMulti extends React.Component {
     //     console.log(userObj, 'userObj')
     //     console.log(this.currentUser, 'current User')
 
-    if (this.state.gameState !== 'active') {
+    if (gameState !== 'active') {
       p5.text('Waiting for another player', 10, p5.height / 2)
     } else if (timer > 0) {
       if (timer % 60 == 0) {
@@ -178,20 +178,20 @@ export default class PongMulti extends React.Component {
       let gameData
       //Conditional rendering based on who is which player
 
-      if (this.userObj.player1 === this.currentUser) {
+      if (player1 === currentUser) {
         //Make a call to the database about rightRecY and it's location
         let rightRef = firebase
           .database()
-          .ref('Pong_Rooms/rooms/' + this.roomCode + '/rightRecY')
+          .ref('Pong_Rooms/rooms/' + roomCode + '/rightRecY')
 
         rightRef.on('value', data => {
           rightRecY = data.val()
         })
         leftRecY += dy
-      } else if (this.userObj.player2 === this.currentUser) {
+      } else if (player2 === currentUser) {
         let leftRef = firebase
           .database()
-          .ref('Pong_Rooms/rooms/' + this.roomCode + '/leftRecY')
+          .ref('Pong_Rooms/rooms/' + roomCode + '/leftRecY')
 
         leftRef.on('value', data => {
           leftRecY = data.val()
@@ -202,7 +202,7 @@ export default class PongMulti extends React.Component {
       // let rightRecY = ballY - PADDLE_HEIGHT / 2
 
       // left side paddle
-      p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
+      p5.rect(PADDLE_SIDE_MARGIN, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
 
       // if paddle off bottom screen
       if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
@@ -219,7 +219,7 @@ export default class PongMulti extends React.Component {
 
       // right side paddle
       p5.rect(
-        p5.width - this.paddleSideMargin - PADDLE_WIDTH,
+        p5.width - PADDLE_SIDE_MARGIN - PADDLE_WIDTH,
         rightRecY,
         PADDLE_WIDTH,
         PADDLE_HEIGHT
@@ -241,10 +241,10 @@ export default class PongMulti extends React.Component {
       //Ball ref from database
       let ballXRef = firebase
         .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballX')
+        .ref('Pong_Rooms/rooms/' + roomCode + '/ballX')
       let ballYRef = firebase
         .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/ballY')
+        .ref('Pong_Rooms/rooms/' + roomCode + '/ballY')
 
       //Set the database value to the rendered ball
       ballXRef.on('value', data => {
@@ -259,8 +259,8 @@ export default class PongMulti extends React.Component {
       p5.ellipse(ballX, ballY, BALL_SIZE)
 
       // calculate ball bounce angle
-      let rx = BALL_SPEED * this.dirx * p5.cos(angle)
-      let ry = BALL_SPEED * this.diry * p5.sin(angle)
+      let rx = BALL_SPEED * dirx * p5.cos(angle)
+      let ry = BALL_SPEED * diry * p5.sin(angle)
 
       // move ball at angle
       ballX += rx
@@ -275,7 +275,7 @@ export default class PongMulti extends React.Component {
       // }
 
       //Update the database with the new values
-      if (this.userObj.player1 === this.currentUser) {
+      if (player1 === currentUser) {
         gameData = {
           ballX,
           ballY,
@@ -283,24 +283,24 @@ export default class PongMulti extends React.Component {
         }
         firebase
           .database()
-          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .ref('/Pong_Rooms/rooms/' + roomCode)
           .update(gameData)
-      } else if (this.userObj.player2 === this.currentUser) {
+      } else if (player2 === currentUser) {
         gameData = {
           rightRecY
         }
         firebase
           .database()
-          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .ref('/Pong_Rooms/rooms/' + roomCode)
           .update(gameData)
       }
       // award points if ball gets passed opponent's paddle
       // then reset ball to center
       let ballResetData
-      let scoreLeftUpdate = this.scoreleft
-      let scoreRightUpdate = this.scoreright
+      let scoreLeftUpdate = scoreLeft
+      let scoreRightUpdate = scoreRight
       if (ballX < BALL_SIZE / 2) {
-        this.scoreright++
+        scoreRight++
         ballY = p5.width / 2
         ballX = p5.width / 2
         ballResetData = {
@@ -310,12 +310,12 @@ export default class PongMulti extends React.Component {
         }
         firebase
           .database()
-          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .ref('/Pong_Rooms/rooms/' + roomCode)
           .update(ballResetData)
         this.passed = false
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
       } else if (ballX + BALL_SIZE / 2 > p5.width) {
-        this.scoreleft++
+        scoreLeft++
         ballY = p5.width / 2
         ballX = p5.width / 2
         ballResetData = {
@@ -325,33 +325,32 @@ export default class PongMulti extends React.Component {
         }
         firebase
           .database()
-          .ref('/Pong_Rooms/rooms/' + this.roomCode)
+          .ref('/Pong_Rooms/rooms/' + roomCode)
           .update(ballResetData)
         this.passed = false
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
       }
 
       // add score to canvas
-      p5.text(this.scoreleft, p5.width / 4, 100)
-      p5.text(this.scoreright, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
+      p5.text(scoreLeft, p5.width / 4, 100)
+      p5.text(scoreRight, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
 
       // ball bounces off of top and bottom of screen
       if (ballY + BALL_SIZE / 2 > p5.height + 5) {
-        this.diry *= -1
+        diry *= -1
       } else if (ballY < BALL_SIZE / 2) {
-        this.diry *= -1
+        diry *= -1
       }
 
       let leftPaddleYRange =
-        ballY > this.state.leftRecY &&
-        ballY < this.state.leftRecY + PADDLE_HEIGHT
+        ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
 
       // if ball hits left then paddle bounce off
       if (
-        ballX - BALL_SIZE / 2 < PADDLE_WIDTH + this.paddleSideMargin &&
+        ballX - BALL_SIZE / 2 < PADDLE_WIDTH + PADDLE_SIDE_MARGIN &&
         leftPaddleYRange
       ) {
-        this.dirx *= -1
+        dirx *= -1
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
       }
 
@@ -361,37 +360,30 @@ export default class PongMulti extends React.Component {
 
       // if ball hits right then paddle bounce off
       if (
-        ballX + BALL_SIZE / 2 >
-          p5.width - PADDLE_WIDTH - this.paddleSideMargin &&
+        ballX + BALL_SIZE / 2 > p5.width - PADDLE_WIDTH - PADDLE_SIDE_MARGIN &&
         rightPaddleYRange
       ) {
-        this.dirx *= -1
+        dirx *= -1
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
       }
 
       // show end game screen
-      if (this.scoreleft == MAX_SCORE) {
+      if (scoreLeft == MAX_SCORE) {
         p5.textSize(50)
         p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-
-        // show end game screen
-        if (this.scoreleft == MAX_SCORE) {
-          p5.textSize(50)
-          p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-          this.setState({
-            play: false,
-            gameOver: true
-          })
-          p5.noLoop()
-        } else if (this.scoreright == MAX_SCORE) {
-          p5.textSize(50)
-          p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
-          this.setState({
-            play: false,
-            gameOver: true
-          })
-          p5.noLoop()
-        }
+        this.setState({
+          play: false,
+          gameOver: true
+        })
+        p5.noLoop()
+      } else if (scoreRight == MAX_SCORE) {
+        p5.textSize(50)
+        p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
+        this.setState({
+          play: false,
+          gameOver: true
+        })
+        p5.noLoop()
       }
     }
   }
@@ -405,19 +397,15 @@ export default class PongMulti extends React.Component {
 
   backToLobby() {
     window.location.href = `/lobby`
-    let deleteRef = firebase.database().ref('Pong_Rooms/rooms/' + this.roomCode)
-    if (
-      this.state.gameOver === true &&
-      this.userObj.player1 === '' &&
-      this.userObj.player2 === ''
-    ) {
+    let deleteRef = firebase.database().ref('Pong_Rooms/rooms/' + roomCode)
+    if (this.state.gameOver === true) {
       deleteRef.remove()
     } else {
       //  else if(this.state.gameOver === true && this.userObj.player1.length > 0 || this.userObj.player2.length > 0){
       // }
       let backToLobbyRef = firebase
         .database()
-        .ref('Pong_Rooms/rooms/' + this.roomCode + '/users')
+        .ref('Pong_Rooms/rooms/' + roomCode + '/users')
       let roomUpdate
       let emptyGameState
       let waitingGameState
@@ -427,36 +415,27 @@ export default class PongMulti extends React.Component {
       waitingGameState = {
         gameState: 'waiting'
       }
-      if (this.userObj.player1 === this.currentUser && !this.userObj.player2) {
+      if (player1 === currentUser && !player2) {
         roomUpdate = {
           player1: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(emptyGameState)
-      } else if (
-        this.userObj.player1 === this.currentUser &&
-        this.userObj.player2
-      ) {
+      } else if (player1 === currentUser && player2) {
         roomUpdate = {
           player1: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(waitingGameState)
-      } else if (
-        this.userObj.player2 === this.currentUser &&
-        !this.userObj.player1
-      ) {
+      } else if (player2 === currentUser && !player1) {
         roomUpdate = {
           player2: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(emptyGameState)
-      } else if (
-        this.userObj.player2 === this.currentUser &&
-        this.userObj.player1
-      ) {
+      } else if (player2 === currentUser && player1) {
         roomUpdate = {
-          player2: ''
+          player2: 'user1'
         }
         backToLobbyRef.update(roomUpdate)
         deleteRef.update(waitingGameState)
@@ -465,18 +444,17 @@ export default class PongMulti extends React.Component {
   }
 
   render() {
-    const val = this.state.hello
-    let userData
-    this.userRef.on('value', function(data) {
-      userData = data.val().player1
-    })
-    let user = this.currentUser || ''
-    console.log(userData, 'user obj?')
-    console.log(this.currentUser, 'current User')
+    // const val = this.state.hello
+    // let userData
+    // this.userRef.on('value', function (data) {
+    //   userData = data.val().player1
+    // })
+    let left = player1 || ''
+    let user = currentUser || ''
     return (
       <div>
         <div>
-          {userData === user ? (
+          {user === left ? (
             <span>You are the left paddle!</span>
           ) : (
             <span>You are the right paddle!</span>
