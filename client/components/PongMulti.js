@@ -4,6 +4,8 @@ import Sketch from 'react-p5'
 import '../../script/lib/p5.speech'
 import p5 from 'p5'
 import firebase from 'firebase'
+import {Button} from '@material-ui/core'
+import {Alert} from '@material-ui/lab'
 // import user from '../store/user'
 
 //Firebase db connection
@@ -71,6 +73,8 @@ export default class PongMulti extends React.Component {
       ballY: 300
     }
     this.setup = this.setup.bind(this)
+    // this.myRef = React.createRef()
+    // this.copyToClipboard = this.copyToClipboard.bind(this)
     // this.mouseClicked = this.mouseClicked.bind(this)
     // let currentUrl = window.location.href
     // let roomCode = currentUrl.split('/')[4]
@@ -255,6 +259,19 @@ export default class PongMulti extends React.Component {
         ballY = data.val()
       })
 
+      let leftScoreRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores/player1Score')
+      let rightScoreRef = firebase
+        .database()
+        .ref('Pong_Rooms/rooms/' + this.roomCode + '/scores/player2Score')
+
+      leftScoreRef.on('value', data => {
+        this.scoreleft = data.val()
+      })
+      rightScoreRef.on('value', data => {
+        this.scoreright = data.val()
+      })
       // ball
       p5.ellipse(ballX, ballY, BALL_SIZE)
 
@@ -297,8 +314,13 @@ export default class PongMulti extends React.Component {
       // award points if ball gets passed opponent's paddle
       // then reset ball to center
       let ballResetData
-      let scoreLeftUpdate = this.scoreleft
-      let scoreRightUpdate = this.scoreright
+      // let databaseScore
+      // this.scoreRef.once('value', (data) => {
+      //   console.log(data.val(), 'data.val in score Ref')
+      //   databaseScore = data.val()
+      // })
+      // this.scoreleft = databaseScore.scoreleft
+      // this.scoreright = databaseScore.scoreright
       if (ballX < BALL_SIZE / 2) {
         this.scoreright++
         ballY = p5.width / 2
@@ -306,7 +328,10 @@ export default class PongMulti extends React.Component {
         ballResetData = {
           ballX,
           ballY,
-          scores: {player2Score: scoreRightUpdate}
+          scores: {
+            player1Score: this.scoreleft,
+            player2Score: this.scoreright
+          }
         }
         firebase
           .database()
@@ -321,7 +346,10 @@ export default class PongMulti extends React.Component {
         ballResetData = {
           ballX,
           ballY,
-          scores: {player1Score: scoreLeftUpdate}
+          scores: {
+            player1Score: this.scoreleft,
+            player2Score: this.scoreright
+          }
         }
         firebase
           .database()
@@ -343,8 +371,7 @@ export default class PongMulti extends React.Component {
       }
 
       let leftPaddleYRange =
-        ballY > this.state.leftRecY &&
-        ballY < this.state.leftRecY + PADDLE_HEIGHT
+        ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
 
       // if ball hits left then paddle bounce off
       if (
@@ -373,25 +400,19 @@ export default class PongMulti extends React.Component {
       if (this.scoreleft == MAX_SCORE) {
         p5.textSize(50)
         p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-
-        // show end game screen
-        if (this.scoreleft == MAX_SCORE) {
-          p5.textSize(50)
-          p5.text('Player 1 wins!', p5.width / 2 - 150, p5.height / 2)
-          this.setState({
-            play: false,
-            gameOver: true
-          })
-          p5.noLoop()
-        } else if (this.scoreright == MAX_SCORE) {
-          p5.textSize(50)
-          p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
-          this.setState({
-            play: false,
-            gameOver: true
-          })
-          p5.noLoop()
-        }
+        this.setState({
+          play: false,
+          gameOver: true
+        })
+        p5.noLoop()
+      } else if (this.scoreright == MAX_SCORE) {
+        p5.textSize(50)
+        p5.text('Player 2 wins!', p5.width / 2 - 150, p5.height / 2)
+        this.setState({
+          play: false,
+          gameOver: true
+        })
+        p5.noLoop()
       }
     }
   }
@@ -464,6 +485,10 @@ export default class PongMulti extends React.Component {
     }
   }
 
+  // copyToClipboard(roomCode) {
+  //   navigator.clipboard.writeText(roomCode)
+  // }
+
   render() {
     const val = this.state.hello
     let userData
@@ -490,14 +515,21 @@ export default class PongMulti extends React.Component {
             <li>Say "Stay" to stop the paddle in place</li>
           </ul>
         </div>
+        <div>
+          <span>Wanna play with a friend? Send them this code: </span>
+          <span>{this.roomCode}</span>
+          <Button onClick={() => navigator.clipboard.writeText(this.roomCode)}>
+            Copy code
+          </Button>
+        </div>
         <Sketch
           mouseClicked={this.mouseClicked}
           setup={this.setup}
           draw={this.draw}
         />
-        <button type="button" onClick={() => this.backToLobby()}>
+        <Button variant="outlined" onClick={() => this.backToLobby()}>
           Back to the Lobby
-        </button>
+        </Button>
       </div>
     )
   }
