@@ -13,7 +13,7 @@ import {Alert} from '@material-ui/lab'
 // const db = firebase.database()
 
 // Constants
-const BALL_SPEED = 3
+const BALL_SPEED = 2
 const BALL_SIZE = 30
 
 const PADDLE_SPEED = 2
@@ -170,6 +170,21 @@ export default class PongMulti extends React.Component {
     //     console.log(userObj, 'userObj')
     //     console.log(this.currentUser, 'current User')
 
+    // left side paddle
+    p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
+
+    // right side paddle
+    p5.rect(
+      p5.width - this.paddleSideMargin - PADDLE_WIDTH,
+      rightRecY,
+      PADDLE_WIDTH,
+      PADDLE_HEIGHT
+    )
+
+    // add score to canvas
+    p5.text(this.scoreleft, p5.width / 4, 100)
+    p5.text(this.scoreright, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
+
     if (this.state.gameState !== 'active') {
       p5.text('Waiting for another player', 10, p5.height / 2)
     } else if (timer > 0) {
@@ -203,31 +218,16 @@ export default class PongMulti extends React.Component {
         rightRecY += dy
       }
 
-      // let rightRecY = ballY - PADDLE_HEIGHT / 2
-
-      // left side paddle
-      p5.rect(this.paddleSideMargin, leftRecY, PADDLE_WIDTH, PADDLE_HEIGHT)
-
       // if paddle off bottom screen
       if (leftRecY > p5.height - PADDLE_HEIGHT - 10) {
-        // dy *= -1
         leftRecY = p5.height - 10 - PADDLE_HEIGHT
         dy = 0
       } else if (leftRecY < 10) {
-        // dy *= -1
         leftRecY = 10
         dy = 0
       } else {
         leftRecY += dy
       }
-
-      // right side paddle
-      p5.rect(
-        p5.width - this.paddleSideMargin - PADDLE_WIDTH,
-        rightRecY,
-        PADDLE_WIDTH,
-        PADDLE_HEIGHT
-      )
 
       // if paddle off bottom screen
       if (rightRecY > p5.height - PADDLE_HEIGHT - 10) {
@@ -311,6 +311,7 @@ export default class PongMulti extends React.Component {
           .ref('/Pong_Rooms/rooms/' + this.roomCode)
           .update(gameData)
       }
+
       // award points if ball gets passed opponent's paddle
       // then reset ball to center
       let ballResetData
@@ -325,6 +326,8 @@ export default class PongMulti extends React.Component {
         this.scoreright++
         ballY = p5.width / 2
         ballX = p5.width / 2
+        this.dirx *= -1
+        timer = 300
         ballResetData = {
           ballX,
           ballY,
@@ -343,6 +346,8 @@ export default class PongMulti extends React.Component {
         this.scoreleft++
         ballY = p5.width / 2
         ballX = p5.width / 2
+        this.dirx *= -1
+        timer = 300
         ballResetData = {
           ballX,
           ballY,
@@ -359,10 +364,6 @@ export default class PongMulti extends React.Component {
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
       }
 
-      // add score to canvas
-      p5.text(this.scoreleft, p5.width / 4, 100)
-      p5.text(this.scoreright, p5.width / 4 * 3 - SCORE_TEXT_SIZE, 100)
-
       // ball bounces off of top and bottom of screen
       if (ballY + BALL_SIZE / 2 > p5.height + 5) {
         this.diry *= -1
@@ -371,7 +372,9 @@ export default class PongMulti extends React.Component {
       }
 
       let leftPaddleYRange =
-        ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
+        ballY + BALL_SIZE / 2 > leftRecY - PADDLE_HEIGHT / 2 &&
+        ballY - BALL_SIZE / 2 < leftRecY + PADDLE_HEIGHT / 2
+      ballY > leftRecY && ballY < leftRecY + PADDLE_HEIGHT
 
       // if ball hits left then paddle bounce off
       if (
@@ -380,6 +383,7 @@ export default class PongMulti extends React.Component {
       ) {
         this.dirx *= -1
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+        ballX += BALL_SIZE / 2 + 3
       }
 
       let rightPaddleYRange =
@@ -394,6 +398,7 @@ export default class PongMulti extends React.Component {
       ) {
         this.dirx *= -1
         angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
+        ballX -= BALL_SIZE / 2 - 3
       }
 
       // show end game screen
