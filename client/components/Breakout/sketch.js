@@ -15,32 +15,34 @@ const WIDTH = 700
 const HEIGHT = 650
 
 const BALL_SIZE = 30
-
-const PADDLE_WIDTH = 100
-const PADDLE_HEIGHT = PADDLE_WIDTH / 6
-
 const MAX_BOUNCE_ANGLE = Math.PI / 4
 
+const PADDLE_WIDTH = 100
+const PADDLE_HEIGHT = PADDLE_WIDTH / 10
+
 const BRICKS_PER_ROW = 7
+const BRICKS_PER_COL = 7
 const BRICK_WIDTH = (WIDTH - 10 * 2) / BRICKS_PER_ROW
 const BRICK_HEIGHT = BRICK_WIDTH / 4
 
 // global vars
-let ball // game ball
+let ball
 let paddle
-
-let playerLives = 3
-
 let bricks = []
 
-let hit = false
+let playerLives = 3 // player's starting lives
+let hit = false // tracks brick collisions per cycle
+
+let angle
 
 export default class Breakout extends React.Component {
-  setup(p5, canvasParentRef) {
+  setup(p5) {
     p5.createCanvas(WIDTH, HEIGHT)
 
+    // instantiate ball
     ball = new Ball(WIDTH / 2, HEIGHT / 2, BALL_SIZE, p5)
 
+    // instantiate paddle
     paddle = new Paddle(
       (WIDTH - PADDLE_WIDTH) / 2,
       HEIGHT - PADDLE_HEIGHT - 20,
@@ -49,8 +51,9 @@ export default class Breakout extends React.Component {
       p5
     )
 
-    for (let i = 0; i < 7; i++) {
-      for (let j = 0; j < 7; j++) {
+    // instantiate all bricks
+    for (let i = 0; i < BRICKS_PER_ROW; i++) {
+      for (let j = 0; j < BRICKS_PER_COL; j++) {
         bricks.push(
           new Brick(
             i * BRICK_WIDTH + 10,
@@ -69,14 +72,19 @@ export default class Breakout extends React.Component {
 
     p5.strokeWeight(0)
     p5.fill(255)
+
+    // display and move ball
     ball.show()
     ball.update()
 
+    // display and move paddle
     paddle.show()
     paddle.setX(p5.mouseX - PADDLE_WIDTH / 2)
 
+    // display bricks
     bricks.forEach(brick => brick.show())
 
+    // collision detection for bricks
     for (let i = 0; i < bricks.length; i++) {
       let inXRange =
         ball.getX() + BALL_SIZE / 2 >= bricks[i].getX() &&
@@ -97,11 +105,10 @@ export default class Breakout extends React.Component {
         ball.getX() - BALL_SIZE / 2 <= bricks[i].getX() + BRICK_WIDTH &&
         ball.getX() + BALL_SIZE / 2 >= bricks[i].getX() + BRICK_WIDTH + 5
 
+      // remove brick if hit and change x or y dir of ball (if a collision hasn't already been made this cycle)
       if (leftSideX && leftSideY) {
         bricks.splice(i, 1)
-
         if (!hit) ball.setX()
-
         hit = true
       } else if (inXRange && inYRange) {
         bricks.splice(i, 1)
@@ -116,18 +123,23 @@ export default class Breakout extends React.Component {
 
     hit = false
 
+    // if the ball hits the left, right, or top of screen then bounce off
+    // if it hits the bottom of the screen, we lose a life and reset the ball
     if (ball.getX() - BALL_SIZE / 2 <= 0) {
-      // if the ball hits the left, right, or top of screen then bounce off
-      // if it hits the bottom of the screen, we lose a life
       ball.setX()
     } else if (ball.getX() + BALL_SIZE / 2 >= WIDTH) {
       ball.setX()
     } else if (ball.getY() - BALL_SIZE / 2 <= 0) {
       ball.setY()
     } else if (ball.getY() - BALL_SIZE / 2 >= HEIGHT) {
-      ball.setY()
+      ball.setPos(WIDTH / 2, HEIGHT / 2)
+      angle = p5.random(p5.PI / 4, 3 * p5.PI / 4)
+      ball.setAngle(angle)
       playerLives--
     }
+
+    // keeps track of if ball has passed the paddle
+    let passed = ball.getY() + BALL_SIZE / 2 <= paddle.getY + 10
 
     let inXRange =
       ball.getX() + BALL_SIZE / 2 >= paddle.getX() &&
@@ -136,17 +148,14 @@ export default class Breakout extends React.Component {
     let inYRange = ball.getY() + BALL_SIZE / 2 >= paddle.getY() - 5
 
     // bounce ball when it hits paddle
-    if (inXRange && inYRange) {
+    if (inXRange && inYRange && !passed) {
       ball.setY()
       console.log()
 
+      // bounce angle is relative to collision point
       let rel = paddle.getX() + PADDLE_WIDTH - ball.getX()
       rel = rel / PADDLE_WIDTH * 2 + 1
-      let angle = rel * MAX_BOUNCE_ANGLE
-
-      if (rel > p5.HALF_PI) {
-        ball.setX()
-      }
+      angle = rel * MAX_BOUNCE_ANGLE
 
       ball.setAngle(angle)
     }
@@ -156,17 +165,19 @@ export default class Breakout extends React.Component {
       p5.textSize(100)
       p5.fill(255, 0, 0)
       p5.textAlign(p5.CENTER)
+
       p5.text('GAME OVER', 350, 420)
       p5.noLoop()
     }
 
+    // game is won when no bricks are left
     if (!bricks.length) {
-      p5.noLoop()
-
       p5.textSize(100)
       p5.fill(0, 255, 0)
       p5.textAlign(p5.CENTER)
+
       p5.text('YOU WIN!', 350, 420)
+      p5.noLoop()
     }
 
     // score display
@@ -175,8 +186,9 @@ export default class Breakout extends React.Component {
     p5.textAlign(p5.CENTER)
     p5.text('Lives: ' + playerLives, WIDTH / 2, HEIGHT / 2)
 
-    p5.textSize(35)
-    p5.text('Bricks Left: ' + bricks.length, WIDTH / 2, 3 * HEIGHT / 5)
+    // bricks remaining display
+    // p5.textSize(35)
+    // p5.text('Bricks Remaining: ' + bricks.length, WIDTH / 2, (3 * HEIGHT) / 5)
   }
 
   render() {
@@ -184,9 +196,6 @@ export default class Breakout extends React.Component {
       <div>
         <div />
         <Sketch setup={this.setup} draw={this.draw} />
-        {/* <button type="button" onClick={playAgain}>
-          play again
-        </button> */}
       </div>
     )
   }
