@@ -8,7 +8,7 @@ import {Button} from '@material-ui/core'
 import {Alert} from '@material-ui/lab'
 
 // Constants
-const BALL_SPEED = 3
+const BALL_SPEED = 2
 const BALL_SIZE = 30
 
 const PADDLE_SPEED = 2
@@ -28,6 +28,7 @@ const SCORE_TEXT_SIZE = 75
 var myRec = new p5.SpeechRec()
 myRec.continuous = true
 myRec.interimResults = true
+myRec.onEnd = myRec.start()
 
 //Speech Recognition Dictionaries
 let upDictionary = ['up', 'cup', 'sup', 'pup', 'yup']
@@ -83,6 +84,18 @@ export default class PongMulti extends React.Component {
       .once('value', data => {
         scoreRight = data.val()
       })
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user.uid
+        firebase
+          .database()
+          .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+          .on('value', snap => {
+            player1 = snap.val().player1
+            player2 = snap.val().player2
+          })
+      }
+    })
   }
 
   setup(p5, canvasParentRef) {
@@ -105,32 +118,23 @@ export default class PongMulti extends React.Component {
       }
     }
 
-    myRec.start()
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user.uid
-        firebase
-          .database()
-          .ref('Pong_Rooms/rooms/' + roomCode + '/users')
-          .on('value', snap => {
-            player1 = snap.val().player1
-            player2 = snap.val().player2
-          })
-      }
-    })
+    // myRec.start()
 
     // p5.noLoop()
   }
 
   draw = p5 => {
     p5.background(220)
-
+    // myRec.stop()
+    // myRec.start()
+    console.log(currentUser, 'the current User')
+    console.log(player1, 'player1')
+    console.log(player2, 'player2')
     if (gameState !== 'active') {
       p5.textSize(50)
       p5.text('Waiting for another player', 10, HEIGHT / 2)
       p5.textSize(100)
-      timer = 300
+      if (player2 === currentUser) timer = 240
     } else if (timer > 0) {
       p5.ellipse(ballX, ballY, BALL_SIZE)
       p5.rect(
