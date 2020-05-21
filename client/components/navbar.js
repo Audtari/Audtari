@@ -7,7 +7,7 @@ import {Switch} from '@material-ui/core'
 
 const Navbar = () => (
   <div id="navbar">
-    <h1 className="gradient-text atariFont">Audtari</h1>
+    {/* <h1 className="gradient-text atariFont">Audtari</h1> */}
     <nav>
       <div className="switchboard">
         <div className="left-side">

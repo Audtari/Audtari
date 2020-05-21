@@ -44,6 +44,22 @@ export default class SignInScreen extends Component {
         </div>
       )
     }
+    let displayName = firebase.auth().currentUser.displayName
+    let userRef = firebase.database().ref('Users/' + displayName)
+    let newUserData = {
+      displayName,
+      email: firebase.auth().currentUser.email,
+      gamesPlayed: 0
+    }
+    //  firebase.database().ref('Breakout')
+    // userRef.push(newUserData)
+
+    userRef.once('value', data => {
+      if (!data.exists()) {
+        userRef.push(newUserData)
+      }
+    })
+
     return (
       <div>
         <h1 className="atariFont">Audtari</h1>
@@ -52,7 +68,10 @@ export default class SignInScreen extends Component {
           signed-in!
         </p>
         <a onClick={() => firebase.auth().signOut()}>
-          <Button variant="outlined"> Sign-Out</Button>
+          <Button color="default" variant="contained">
+            {' '}
+            Sign-Out
+          </Button>
         </a>
       </div>
     )
