@@ -13,7 +13,7 @@ import Brick from './Brick'
 
 // CONSTANTS
 const WIDTH = 700
-const HEIGHT = 650
+const HEIGHT = 700
 
 const BALL_SIZE = 30
 const MAX_BOUNCE_ANGLE = Math.PI / 4 // ball will bounce at an angle between PI/4 and 3*PI/4
@@ -57,7 +57,7 @@ export default class Breakout extends React.Component {
     p5.createCanvas(WIDTH, HEIGHT)
 
     // instantiate ball
-    ball = new Ball(WIDTH / 2, HEIGHT / 2, BALL_SIZE, p5)
+    ball = new Ball(WIDTH / 2, HEIGHT / 3, BALL_SIZE, p5)
 
     // instantiate paddle
     paddle = new Paddle(
@@ -86,7 +86,6 @@ export default class Breakout extends React.Component {
     }
 
     myRec.onResult = () => {
-      console.log(myRec)
       var mostrecentword = myRec.resultString.split(' ').pop()
       if (leftDictionary.indexOf(mostrecentword) !== -1) {
         paddleDY = -PADDLE_SPEED
@@ -119,12 +118,12 @@ export default class Breakout extends React.Component {
     // p5.textAlign(p5.CENTER)
 
     if (playerLives > 0) {
-      p5.text('Lives:', WIDTH / 4, HEIGHT / 2)
+      p5.text('Lives:', WIDTH / 4 - 50, HEIGHT / 2 - 50)
     }
 
     for (let i = 0; i < playerLives; i++) {
       p5.fill(255, 0, 0)
-      heart(2 * WIDTH / 3 + i * 70, 3 * HEIGHT / 7, 40, p5)
+      heart(2 * WIDTH / 3 + i * 70, 3 * HEIGHT / 7 - 50, 40, p5)
     }
 
     // bricks remaining display
@@ -201,18 +200,16 @@ export default class Breakout extends React.Component {
       // ball.setAngle(angle)
       playerLives--
     }
-
-    // keeps track of if ball has passed the paddle
-    let passed = ball.getY() + BALL_SIZE / 2 <= paddle.getY + 10
-
     let inXRange =
       ball.getX() + BALL_SIZE / 2 >= paddle.getX() &&
       ball.getX() - BALL_SIZE / 2 <= paddle.getX() + PADDLE_WIDTH
 
-    let inYRange = ball.getY() + BALL_SIZE / 2 >= paddle.getY() - 5
+    let inYRange =
+      ball.getY() + BALL_SIZE / 2 >= paddle.getY() &&
+      ball.getY() + BALL_SIZE / 2 <= paddle.getY() + 5
 
     // bounce ball when it hits paddle
-    if (inXRange && inYRange && !passed) {
+    if (inXRange && inYRange && ball.getYSpeed() > 0) {
       ball.setY()
       // bounce angle is relative to collision point
       let rel = paddle.getX() + PADDLE_WIDTH - ball.getX()

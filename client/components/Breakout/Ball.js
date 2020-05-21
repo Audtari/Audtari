@@ -14,8 +14,8 @@ Class Params:
 
 // # of pixels per frame that the balls x and y coordinates will change (i.e. the balls speed)
 // Note: these are not constants bc their direction will change (i.e. *= -1)
-let ballXspeed = 4
-let ballYspeed = 4
+let ballXspeed = 3
+let ballYspeed = 3
 
 export default class Ball {
   constructor(x, y, size, p5) {
@@ -73,6 +73,10 @@ export default class Ball {
     if (ballXspeed < 0) {
       ballXspeed *= -1
     }
+  }
+
+  getYSpeed() {
+    return ballYspeed
   }
 
   // display the ball on the canvas
