@@ -21,7 +21,8 @@ export default class Lobby extends React.Component {
     this.state = {
       roomArr: [],
       roomInput: '',
-      open: false,
+      open1: false,
+      open2: false,
       roomType: false,
       roomName: ''
     }
@@ -29,6 +30,8 @@ export default class Lobby extends React.Component {
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleClose = this.handleClose.bind(this)
     this.handleClickOpen = this.handleClickOpen.bind(this)
+    this.clickOpenCode = this.clickOpenCode.bind(this)
+    this.clickCloseCode = this.clickCloseCode.bind(this)
     this.onClick = this.onClick.bind(this)
     this.handleListItemClick = this.handleListItemClick.bind(this)
   }
@@ -55,7 +58,7 @@ export default class Lobby extends React.Component {
     console.log(isPrivate)
 
     this.setState({
-      open: false
+      open1: false
     })
     let newRoomKey = firebase
       .database()
@@ -139,19 +142,31 @@ export default class Lobby extends React.Component {
 
   setOpen(val) {
     this.setState({
-      open: val
+      open1: val
     })
   }
 
   handleClickOpen() {
     this.setState({
-      open: true
+      open1: true
+    })
+  }
+
+  clickOpenCode() {
+    this.setState({
+      open2: true
+    })
+  }
+
+  clickCloseCode() {
+    this.setState({
+      open2: false
     })
   }
 
   handleClose() {
     this.setState({
-      open: false
+      open1: false
     })
   }
 
@@ -176,16 +191,40 @@ export default class Lobby extends React.Component {
       }
     }
     return (
-      <div>
+      <div className="component">
         <h1>This is the Lobby</h1>
-        <label>
-          Got a code? Enter it here:
-          <Input
-            type="text"
-            value={this.state.roomInput}
-            onChange={this.handleChange}
-          />
-        </label>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={this.clickOpenCode}
+        >
+          Got a Code?
+        </Button>
+        <Dialog
+          open={this.state.open2}
+          onClose={this.clickCloseCode}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">Enter it below</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="roomName"
+              label="Room Code"
+              type="name"
+              fullWidth
+              value={this.state.roomName}
+              onChange={this.handleNameChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.onClick} color="primary">
+              Create my Room
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Button
           variant="outlined"
           onClick={() => this.onJoin(this.state.roomInput)}
@@ -212,14 +251,14 @@ export default class Lobby extends React.Component {
         </div> */}
         <div>
           <Button
-            variant="outlined"
-            color="primary"
+            variant="contained"
+            color="default"
             onClick={this.handleClickOpen}
           >
             Create Room
           </Button>
           <Dialog
-            open={this.state.open}
+            open={this.state.open1}
             onClose={this.handleClose}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
@@ -298,6 +337,7 @@ export default class Lobby extends React.Component {
             </Button>
           </form>
         </div>
+        {/* <div className="footer"></div> */}
       </div>
     )
   }

@@ -504,7 +504,7 @@ export default class PongMulti extends React.Component {
     console.log(userData, 'user obj?')
     console.log(this.currentUser, 'current User')
     return (
-      <div>
+      <div className="component">
         <div>
           {userData === user ? (
             <span>You are the left paddle!</span>

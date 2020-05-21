@@ -1,22 +1,33 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
+import {Switch} from '@material-ui/core'
 // import PropTypes from 'prop-types'
 // import {connect} from 'react-redux'
 // import {logout} from '../store'
 
 const Navbar = () => (
-  <div>
+  <div id="navbar">
     <h1 className="gradient-text atariFont">Audtari</h1>
     <nav>
-      <div>
+      <div className="switchboard">
+        <div className="left-side">
+          <Switch color="default" />
+          <Switch color="default" />
+        </div>
+        <div className="right-side">
+          <Switch color="default" />
+          <Switch color="default" />
+          <Switch color="default" />
+        </div>
+
         {/* The navbar will show these links before you log in */}
-        <Link to="/home">Home</Link>
+        {/* <Link to="/home">Home</Link>
         <Link to="/accountInfo">Account Info</Link>
         <Link to="/pong">Pong SP</Link>
-        <Link to="/lobby">Pong MP</Link>
+        <Link to="/lobby">Pong MP</Link> */}
       </div>
     </nav>
-    <hr />
+    {/* <hr /> */}
   </div>
 )
 
