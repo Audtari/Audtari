@@ -68,15 +68,15 @@ export default class Lobby extends React.Component {
     const newRoomData = {
       ballX: 300,
       ballY: 250,
-      leftRecY: 300,
-      rightRecY: 300,
+      leftRecY: 210,
+      rightRecY: 210,
       scores: {
         player1Score: 0,
         player2Score: 0
       },
       gameState: 'empty',
       users: {
-        player1: 'user1',
+        player1: '',
         player2: ''
       },
       name: this.state.roomName,
@@ -109,7 +109,6 @@ export default class Lobby extends React.Component {
     } else {
       currentUser = firebase.auth().currentUser.uid
     }
-    console.log('CURRENT USER', currentUser)
     let checkForPlayersRef = firebase
       .database()
       .ref('Pong_Rooms/rooms/' + room + '/users')
@@ -118,9 +117,13 @@ export default class Lobby extends React.Component {
     checkForPlayersRef.once('value', data => {
       userObj = data.val()
     })
-    if (userObj.player1 === 'user1') {
+    if (userObj.player1 === '') {
       updates['/rooms/' + room + '/users/player1'] = currentUser
-      updates['/rooms/' + room + '/gameState'] = 'waiting'
+      if (userObj.player2 === '') {
+        updates['/rooms/' + room + '/gameState'] = 'waiting'
+      } else {
+        updates['/rooms/' + room + '/gameState'] = 'active'
+      }
     } else {
       updates['/rooms/' + room + '/users/player2'] = currentUser
       updates['/rooms/' + room + '/gameState'] = 'active'
@@ -329,8 +332,10 @@ export default class Lobby extends React.Component {
           </Dialog> */}
         <div id="create-room-form">
           <form>
-            <label>Private</label>
+            <label>Private?</label>
             <input type="checkbox" id="private" />
+            <label>RoomCode</label>
+            <input type="text" id="roomName" />
             <br />
             <Button type="button" onClick={() => this.onClick()}>
               Create Room
