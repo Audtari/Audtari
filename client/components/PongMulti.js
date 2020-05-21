@@ -412,7 +412,7 @@ export default class PongMulti extends React.Component {
     let left = player1 || ''
     let user = currentUser || ''
     return (
-      <div>
+      <div className="component">
         <div>
           {user === left ? (
             <span>You are the left paddle!</span>
