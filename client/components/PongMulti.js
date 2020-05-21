@@ -365,11 +365,138 @@ export default class PongMulti extends React.Component {
         p5.text('Player 1 wins!', WIDTH / 2 - 150, HEIGHT / 2)
         gameOver = true
         p5.noLoop()
+        let gamesPlayedRef
+        let goalsScoredRef
+        let lossRef
+        let winsRef
+
+        if (player1 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            winsRef = data.val().wins
+            winsRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            wins: winsRef
+          }
+          userStats.update(endGameData)
+        } else if (player2 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            lossRef = data.val().losses
+            lossRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            losses: lossRef
+          }
+          userStats.update(endGameData)
+        }
       } else if (scoreRight == MAX_SCORE) {
         p5.textSize(50)
         p5.text('Player 2 wins!', WIDTH / 2 - 150, HEIGHT / 2)
         gameOver = true
         p5.noLoop()
+        if (player2 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            winsRef = data.val().wins
+            winsRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            wins: winsRef
+          }
+          userStats.update(endGameData)
+        } else if (player1 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            lossRef = data.val().losses
+            lossRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            losses: lossRef
+          }
+          userStats.update(endGameData)
+        }
       }
     }
   }
