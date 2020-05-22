@@ -331,7 +331,7 @@ export default class Pong extends React.Component {
     ) {
       this.dirx *= -1
       ballX += this.paddleSideMargin + PADDLE_WIDTH - BALL_SIZE / 2
-      angle = p5.random(-1 * p5.HALF_PI / 4, p5.HALF_PI / 4)
+      angle = p5.random(-1 * p5.HALF_PI / 2, p5.HALF_PI / 2)
     }
 
     let rightPaddleYRange =
