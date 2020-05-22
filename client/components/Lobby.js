@@ -21,7 +21,8 @@ export default class Lobby extends React.Component {
     this.state = {
       roomArr: [],
       roomInput: '',
-      open: false,
+      open1: false,
+      open2: false,
       roomType: false,
       roomName: ''
     }
@@ -29,6 +30,8 @@ export default class Lobby extends React.Component {
     this.handleNameChange = this.handleNameChange.bind(this)
     this.handleClose = this.handleClose.bind(this)
     this.handleClickOpen = this.handleClickOpen.bind(this)
+    this.clickOpenCode = this.clickOpenCode.bind(this)
+    this.clickCloseCode = this.clickCloseCode.bind(this)
     this.onClick = this.onClick.bind(this)
     this.handleListItemClick = this.handleListItemClick.bind(this)
   }
@@ -55,7 +58,7 @@ export default class Lobby extends React.Component {
     console.log(isPrivate)
 
     this.setState({
-      open: false
+      open1: false
     })
     let newRoomKey = firebase
       .database()
@@ -65,15 +68,15 @@ export default class Lobby extends React.Component {
     const newRoomData = {
       ballX: 300,
       ballY: 250,
-      leftRecY: 300,
-      rightRecY: 300,
+      leftRecY: 210,
+      rightRecY: 210,
       scores: {
         player1Score: 0,
         player2Score: 0
       },
       gameState: 'empty',
       users: {
-        player1: 'user1',
+        player1: '',
         player2: ''
       },
       name: this.state.roomName,
@@ -106,7 +109,6 @@ export default class Lobby extends React.Component {
     } else {
       currentUser = firebase.auth().currentUser.uid
     }
-    console.log('CURRENT USER', currentUser)
     let checkForPlayersRef = firebase
       .database()
       .ref('Pong_Rooms/rooms/' + room + '/users')
@@ -115,9 +117,13 @@ export default class Lobby extends React.Component {
     checkForPlayersRef.once('value', data => {
       userObj = data.val()
     })
-    if (userObj.player1 === 'user1') {
+    if (userObj.player1 === '') {
       updates['/rooms/' + room + '/users/player1'] = currentUser
-      updates['/rooms/' + room + '/gameState'] = 'waiting'
+      if (userObj.player2 === '') {
+        updates['/rooms/' + room + '/gameState'] = 'waiting'
+      } else {
+        updates['/rooms/' + room + '/gameState'] = 'active'
+      }
     } else {
       updates['/rooms/' + room + '/users/player2'] = currentUser
       updates['/rooms/' + room + '/gameState'] = 'active'
@@ -139,19 +145,31 @@ export default class Lobby extends React.Component {
 
   setOpen(val) {
     this.setState({
-      open: val
+      open1: val
     })
   }
 
   handleClickOpen() {
     this.setState({
-      open: true
+      open1: true
+    })
+  }
+
+  clickOpenCode() {
+    this.setState({
+      open2: true
+    })
+  }
+
+  clickCloseCode() {
+    this.setState({
+      open2: false
     })
   }
 
   handleClose() {
     this.setState({
-      open: false
+      open1: false
     })
   }
 
@@ -176,16 +194,40 @@ export default class Lobby extends React.Component {
       }
     }
     return (
-      <div>
+      <div className="component">
         <h1>This is the Lobby</h1>
-        <label>
-          Got a code? Enter it here:
-          <Input
-            type="text"
-            value={this.state.roomInput}
-            onChange={this.handleChange}
-          />
-        </label>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={this.clickOpenCode}
+        >
+          Got a Code?
+        </Button>
+        <Dialog
+          open={this.state.open2}
+          onClose={this.clickCloseCode}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">Enter it below</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="roomName"
+              label="Room Code"
+              type="name"
+              fullWidth
+              value={this.state.roomName}
+              onChange={this.handleNameChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.onClick} color="primary">
+              Create my Room
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Button
           variant="outlined"
           onClick={() => this.onJoin(this.state.roomInput)}
@@ -212,14 +254,14 @@ export default class Lobby extends React.Component {
         </div> */}
         <div>
           <Button
-            variant="outlined"
-            color="primary"
+            variant="contained"
+            color="default"
             onClick={this.handleClickOpen}
           >
             Create Room
           </Button>
           <Dialog
-            open={this.state.open}
+            open={this.state.open1}
             onClose={this.handleClose}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
@@ -290,14 +332,17 @@ export default class Lobby extends React.Component {
           </Dialog> */}
         <div id="create-room-form">
           <form>
-            <label>Private</label>
+            <label>Private?</label>
             <input type="checkbox" id="private" />
+            <label>RoomCode</label>
+            <input type="text" id="roomName" />
             <br />
             <Button type="button" onClick={() => this.onClick()}>
               Create Room
             </Button>
           </form>
         </div>
+        {/* <div className="footer"></div> */}
       </div>
     )
   }

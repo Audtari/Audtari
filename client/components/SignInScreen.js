@@ -13,11 +13,17 @@ var uiConfig = {
   autoUpgradeAnonymousUsers: true
 }
 
+let userKey
+let userData
 export default class SignInScreen extends Component {
   constructor() {
     super()
     this.state = {
-      isSignedIn: false
+      isSignedIn: false,
+      gamesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      goalsScored: 0
     }
   }
 
@@ -25,6 +31,50 @@ export default class SignInScreen extends Component {
     this.unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged(user => this.setState({isSignedIn: !!user}))
+
+    if (firebase.auth().currentUser) {
+      let displayName = firebase.auth().currentUser.displayName
+      let userRef = firebase.database().ref('Users/' + displayName)
+      let newUserData = {
+        displayName,
+        email: firebase.auth().currentUser.email,
+        gamesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        goalsScored: 0
+      }
+      this.statRef = firebase.database().ref('Users/' + displayName)
+      this.statRef
+        .on('value', data => {
+          userKey = Object.keys(data.val())
+        })
+        .then(() => {
+          console.log(userKey, 'userKey')
+          let userStats = firebase
+            .database()
+            .ref('Users/' + displayName + '/' + userKey[0])
+          userStats
+            .on('value', data => {
+              userData = data.val()
+            })
+            .then(() => {
+              console.log(userData, 'userData in the state setting')
+            })
+        })
+
+      userRef.once('value', data => {
+        if (!data.exists()) {
+          userRef.push(newUserData)
+        } else {
+          this.setState({
+            gamesPlayed: userData.gamesPlayed,
+            wins: userData.wins,
+            losses: userData.losses,
+            goalsScored: userData.goalsScored
+          })
+        }
+      })
+    }
   }
 
   componentWillUnmount() {
@@ -44,6 +94,7 @@ export default class SignInScreen extends Component {
         </div>
       )
     }
+
     return (
       <div>
         <h1 className="atariFont">Audtari</h1>
@@ -51,8 +102,12 @@ export default class SignInScreen extends Component {
           Welcome {firebase.auth().currentUser.displayName}! You are now
           signed-in!
         </p>
+        <h4>Games Played: {this.state.gamesPlayed}</h4>
         <a onClick={() => firebase.auth().signOut()}>
-          <Button variant="outlined"> Sign-Out</Button>
+          <Button color="default" variant="contained">
+            {' '}
+            Sign-Out
+          </Button>
         </a>
       </div>
     )
