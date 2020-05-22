@@ -63,6 +63,7 @@ let roomCode = window.location.href.split('/')[4]
 let currentUser
 let player1, player2
 let gameState, gameOver
+let readyCheck1, readyCheck2
 
 export default class PongMulti extends React.Component {
   componentDidMount() {
@@ -127,15 +128,23 @@ export default class PongMulti extends React.Component {
     p5.background(220)
     // myRec.stop()
     // myRec.start()
-    console.log(currentUser, 'the current User')
-    console.log(player1, 'player1')
-    console.log(player2, 'player2')
+    let readyRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    let ready
+    readyRef.on('value', data => {
+      ready = data.val()
+    })
     if (gameState !== 'active') {
       p5.textSize(50)
       p5.text('Waiting for another player', 10, HEIGHT / 2)
       p5.textSize(100)
-      if (player2 === currentUser) timer = 240
-    } else if (timer > 0) {
+      timer = 300
+    } else if (
+      timer > 0 &&
+      ready.player1Ready === true &&
+      ready.player2Ready === true
+    ) {
       p5.ellipse(ballX, ballY, BALL_SIZE)
       p5.rect(
         WIDTH - PADDLE_SIDE_MARGIN - PADDLE_WIDTH,
@@ -149,7 +158,7 @@ export default class PongMulti extends React.Component {
       }
       p5.text(text, WIDTH / 2 - 10, HEIGHT / 2)
       timer--
-    } else {
+    } else if (ready.player1Ready === true && ready.player2Ready === true) {
       //Conditional rendering based on who is which player
       if (player1 === currentUser) {
         //Make a call to the database about rightRecY and it's location
@@ -539,6 +548,33 @@ export default class PongMulti extends React.Component {
     }
   }
 
+  readyToPlay() {
+    let checkForPlayersRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    if (currentUser === player1) {
+      checkForPlayersRef.on('value', data => {
+        readyCheck1 = data.val().player1Ready
+        if (readyCheck1 === false) !readyCheck1
+      })
+      let updateData = {
+        player1Ready: true
+      }
+      checkForPlayersRef.update(updateData)
+    } else {
+      checkForPlayersRef.on('value', data => {
+        readyCheck2 = data.val().player2Ready
+        if (readyCheck2 === false) !readyCheck2
+      })
+      let updateData = {
+        player2Ready: true
+      }
+      checkForPlayersRef.update(updateData)
+    }
+    if (readyCheck1 === true && readyCheck2 === true) {
+    }
+  }
+
   render() {
     let left = player1 || ''
     let user = currentUser || ''
@@ -565,6 +601,9 @@ export default class PongMulti extends React.Component {
           <Button onClick={() => navigator.clipboard.writeText(roomCode)}>
             Copy code
           </Button>
+        </div>
+        <div>
+          <Button onClick={() => this.readyToPlay()}>Ready Up!</Button>
         </div>
         <Sketch
           mouseClicked={this.mouseClicked}

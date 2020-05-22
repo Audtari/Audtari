@@ -77,7 +77,9 @@ export default class Lobby extends React.Component {
       gameState: 'empty',
       users: {
         player1: '',
-        player2: ''
+        player2: '',
+        player1Ready: false,
+        player2Ready: false
       },
       name: this.state.roomName,
       private: this.state.roomType
