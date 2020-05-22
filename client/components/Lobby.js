@@ -77,7 +77,9 @@ export default class Lobby extends React.Component {
       gameState: 'empty',
       users: {
         player1: '',
-        player2: ''
+        player2: '',
+        player1Ready: false,
+        player2Ready: false
       },
       name: this.state.roomName,
       private: this.state.roomType
@@ -223,8 +225,11 @@ export default class Lobby extends React.Component {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.onClick} color="primary">
-              Create my Room
+            <Button
+              onClick={() => this.onJoin(this.state.roomName)}
+              color="primary"
+            >
+              Go to the Room
             </Button>
           </DialogActions>
         </Dialog>

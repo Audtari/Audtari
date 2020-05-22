@@ -8,7 +8,7 @@ import {Button} from '@material-ui/core'
 import {Alert} from '@material-ui/lab'
 
 // Constants
-const BALL_SPEED = 3
+const BALL_SPEED = 2
 const BALL_SIZE = 30
 
 const PADDLE_SPEED = 2
@@ -28,6 +28,7 @@ const SCORE_TEXT_SIZE = 75
 var myRec = new p5.SpeechRec()
 myRec.continuous = true
 myRec.interimResults = true
+myRec.onEnd = myRec.start()
 
 //Speech Recognition Dictionaries
 let upDictionary = ['up', 'cup', 'sup', 'pup', 'yup']
@@ -62,6 +63,7 @@ let roomCode = window.location.href.split('/')[4]
 let currentUser
 let player1, player2
 let gameState, gameOver
+let readyCheck1, readyCheck2
 
 export default class PongMulti extends React.Component {
   componentDidMount() {
@@ -83,6 +85,18 @@ export default class PongMulti extends React.Component {
       .once('value', data => {
         scoreRight = data.val()
       })
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user.uid
+        firebase
+          .database()
+          .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+          .on('value', snap => {
+            player1 = snap.val().player1
+            player2 = snap.val().player2
+          })
+      }
+    })
   }
 
   setup(p5, canvasParentRef) {
@@ -105,33 +119,32 @@ export default class PongMulti extends React.Component {
       }
     }
 
-    myRec.start()
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user.uid
-        firebase
-          .database()
-          .ref('Pong_Rooms/rooms/' + roomCode + '/users')
-          .on('value', snap => {
-            player1 = snap.val().player1
-            player2 = snap.val().player2
-          })
-      }
-    })
+    // myRec.start()
 
     // p5.noLoop()
   }
 
   draw = p5 => {
     p5.background(220)
-
+    // myRec.stop()
+    // myRec.start()
+    let readyRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    let ready
+    readyRef.on('value', data => {
+      ready = data.val()
+    })
     if (gameState !== 'active') {
       p5.textSize(50)
       p5.text('Waiting for another player', 10, HEIGHT / 2)
       p5.textSize(100)
       timer = 300
-    } else if (timer > 0) {
+    } else if (
+      timer > 0 &&
+      ready.player1Ready === true &&
+      ready.player2Ready === true
+    ) {
       p5.ellipse(ballX, ballY, BALL_SIZE)
       p5.rect(
         WIDTH - PADDLE_SIDE_MARGIN - PADDLE_WIDTH,
@@ -145,7 +158,7 @@ export default class PongMulti extends React.Component {
       }
       p5.text(text, WIDTH / 2 - 10, HEIGHT / 2)
       timer--
-    } else {
+    } else if (ready.player1Ready === true && ready.player2Ready === true) {
       //Conditional rendering based on who is which player
       if (player1 === currentUser) {
         //Make a call to the database about rightRecY and it's location
@@ -361,11 +374,138 @@ export default class PongMulti extends React.Component {
         p5.text('Player 1 wins!', WIDTH / 2 - 150, HEIGHT / 2)
         gameOver = true
         p5.noLoop()
+        let gamesPlayedRef
+        let goalsScoredRef
+        let lossRef
+        let winsRef
+
+        if (player1 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            winsRef = data.val().wins
+            winsRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            wins: winsRef
+          }
+          userStats.update(endGameData)
+        } else if (player2 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            lossRef = data.val().losses
+            lossRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            losses: lossRef
+          }
+          userStats.update(endGameData)
+        }
       } else if (scoreRight == MAX_SCORE) {
         p5.textSize(50)
         p5.text('Player 2 wins!', WIDTH / 2 - 150, HEIGHT / 2)
         gameOver = true
         p5.noLoop()
+        if (player2 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            winsRef = data.val().wins
+            winsRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            wins: winsRef
+          }
+          userStats.update(endGameData)
+        } else if (player1 === currentUser) {
+          let endRef = firebase
+            .database()
+            .ref('Users/' + firebase.auth().currentUser.displayName)
+          let userKey
+          endRef.on('value', data => {
+            userKey = Object.keys(data.val())
+          })
+          let userStats = firebase
+            .database()
+            .ref(
+              'Users/' +
+                firebase.auth().currentUser.displayName +
+                '/' +
+                userKey[0]
+            )
+          userStats.on('value', function(data) {
+            gamesPlayedRef = data.val().gamesPlayed
+            gamesPlayedRef++
+            goalsScoredRef = data.val().goalsScored
+            goalsScoredRef += scoreLeft
+            lossRef = data.val().losses
+            lossRef++
+          })
+          let endGameData = {
+            gamesPlayed: gamesPlayedRef,
+            goalsScored: goalsScoredRef,
+            losses: lossRef
+          }
+          userStats.update(endGameData)
+        }
       }
     }
   }
@@ -408,6 +548,33 @@ export default class PongMulti extends React.Component {
     }
   }
 
+  readyToPlay() {
+    let checkForPlayersRef = firebase
+      .database()
+      .ref('Pong_Rooms/rooms/' + roomCode + '/users')
+    if (currentUser === player1) {
+      checkForPlayersRef.on('value', data => {
+        readyCheck1 = data.val().player1Ready
+        if (readyCheck1 === false) !readyCheck1
+      })
+      let updateData = {
+        player1Ready: true
+      }
+      checkForPlayersRef.update(updateData)
+    } else {
+      checkForPlayersRef.on('value', data => {
+        readyCheck2 = data.val().player2Ready
+        if (readyCheck2 === false) !readyCheck2
+      })
+      let updateData = {
+        player2Ready: true
+      }
+      checkForPlayersRef.update(updateData)
+    }
+    if (readyCheck1 === true && readyCheck2 === true) {
+    }
+  }
+
   render() {
     let left = player1 || ''
     let user = currentUser || ''
@@ -434,6 +601,9 @@ export default class PongMulti extends React.Component {
           <Button onClick={() => navigator.clipboard.writeText(roomCode)}>
             Copy code
           </Button>
+        </div>
+        <div>
+          <Button onClick={() => this.readyToPlay()}>Ready Up!</Button>
         </div>
         <Sketch
           mouseClicked={this.mouseClicked}
