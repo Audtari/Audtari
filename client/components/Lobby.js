@@ -11,7 +11,9 @@ import {
   DialogContentText,
   TextField,
   List,
-  ListItemText
+  ListItemText,
+  Container,
+  Card
 } from '@material-ui/core'
 // import AlertDialog from './Dialog'
 
@@ -197,57 +199,115 @@ export default class Lobby extends React.Component {
     }
     return (
       <div className="component">
-        <h1>This is the Lobby</h1>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={this.clickOpenCode}
-        >
-          Got a Code?
-        </Button>
-        <Dialog
-          open={this.state.open2}
-          onClose={this.clickCloseCode}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Enter it below</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="roomName"
-              label="Room Code"
-              type="name"
-              fullWidth
-              value={this.state.roomName}
-              onChange={this.handleNameChange}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => this.onJoin(this.state.roomName)}
-              color="primary"
-            >
-              Go to the Room
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <Button
+        <h1>Welcome to the Lobby</h1>
+        <div id="lobbybuttons">
+          <Button
+            variant="contained"
+            color="default"
+            onClick={this.clickOpenCode}
+          >
+            Got a Code?
+          </Button>
+          <Dialog
+            open={this.state.open2}
+            onClose={this.clickCloseCode}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">Enter it below</DialogTitle>
+            <DialogContent>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="roomName"
+                label="Room Code"
+                type="name"
+                fullWidth
+                value={this.state.roomName}
+                onChange={this.handleNameChange}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => this.onJoin(this.state.roomName)}
+                color="primary"
+              >
+                Go to the Room
+              </Button>
+            </DialogActions>
+          </Dialog>
+          {/* <Button
           variant="outlined"
           onClick={() => this.onJoin(this.state.roomInput)}
         >
           Join Room
-        </Button>
+        </Button> */}
+          <div>
+            <Button
+              variant="contained"
+              color="default"
+              onClick={this.handleClickOpen}
+            >
+              Create Room
+            </Button>
+            <Dialog
+              open={this.state.open1}
+              onClose={this.handleClose}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
+              <DialogTitle id="alert-dialog-title">
+                {'What kind of room are you creating?'}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  Would you like this to be a public game that others can join
+                  or a private game for you and a friend?
+                </DialogContentText>
+                <List>
+                  <ListItem
+                    button
+                    onClick={() => this.handleListItemClick('public')}
+                  >
+                    <ListItemText primary="Public" />
+                  </ListItem>
+                  <ListItem
+                    button
+                    onClick={() => this.handleListItemClick('private')}
+                  >
+                    <ListItemText primary="Private" />
+                  </ListItem>
+                </List>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="roomName"
+                  label="Room Name"
+                  type="name"
+                  fullWidth
+                  value={this.state.roomName}
+                  onChange={this.handleNameChange}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={this.onClick} color="primary">
+                  Create my Room
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+        </div>
         <ul className="rooms">
           {keys.map(room => {
             // console.log(room)
             return (
-              <div key={room}>
-                <ListItem>{rooms[room].name}</ListItem>{' '}
-                <Button variant="outlined" onClick={() => this.onJoin(room)}>
-                  Join Room
-                </Button>
+              <div className="card" key={room}>
+                <Card>
+                  <ListItem>{rooms[room].name}</ListItem>{' '}
+                  <Button variant="outlined" onClick={() => this.onJoin(room)}>
+                    Join Room
+                  </Button>
+                </Card>
               </div>
             )
           })}
@@ -257,85 +317,7 @@ export default class Lobby extends React.Component {
             Create Room
           </Button>
         </div> */}
-        <div>
-          <Button
-            variant="contained"
-            color="default"
-            onClick={this.handleClickOpen}
-          >
-            Create Room
-          </Button>
-          <Dialog
-            open={this.state.open1}
-            onClose={this.handleClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogTitle id="alert-dialog-title">
-              {'What kind of room are you creating?'}
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                Would you like this to be a public game that others can join or
-                a private game for you and a friend?
-              </DialogContentText>
-              <List>
-                <ListItem
-                  button
-                  onClick={() => this.handleListItemClick('public')}
-                >
-                  <ListItemText primary="Public" />
-                </ListItem>
-                <ListItem
-                  button
-                  onClick={() => this.handleListItemClick('private')}
-                >
-                  <ListItemText primary="Private" />
-                </ListItem>
-              </List>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="roomName"
-                label="Room Name"
-                type="name"
-                fullWidth
-                value={this.state.roomName}
-                onChange={this.handleNameChange}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={this.onClick} color="primary">
-                Create my Room
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-        {/* <AlertDialog
-            open={open}
-            // onJoin={this.onJoin}
-            // onClick={this.onClick}
-          /> */}
-        {/* <Dialog
-            open={open}
-            // onClose={handleClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                Would you like this to be a public game that others can join or
-                a private game for you and a friend?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button color="primary" autofocus>
-                Public
-              </Button>
-              <Button color="primary">Private</Button>
-            </DialogActions>
-          </Dialog> */}
-        <div id="create-room-form">
+        {/* <div id="create-room-form">
           <form>
             <label>Private?</label>
             <input type="checkbox" id="private" />
@@ -346,7 +328,7 @@ export default class Lobby extends React.Component {
               Create Room
             </Button>
           </form>
-        </div>
+        </div> */}
         {/* <div className="footer"></div> */}
       </div>
     )

@@ -16,7 +16,7 @@ const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 const PADDLE_SIDE_MARGIN = 10
 
-const MAX_SCORE = 10
+const MAX_SCORE = 2
 
 // Canvas dimensions
 const WIDTH = 600
@@ -580,39 +580,55 @@ export default class PongMulti extends React.Component {
     let user = currentUser || ''
     return (
       <div className="component">
-        <div>
-          {user === left ? (
-            <span>You are the left paddle!</span>
-          ) : (
-            <span>You are the right paddle!</span>
-          )}
+        <div id="multi">
+          <div>
+            {user === left ? (
+              <span>You are the left paddle!</span>
+            ) : (
+              <span>You are the right paddle!</span>
+            )}
+          </div>
+          <div>
+            <h3>Control your paddle with your voice:</h3>
+            <ul>
+              <li>Say "Up" to move the paddle up</li>
+              <li>Say "Down" to move the paddle down</li>
+              <li>Say "Stay" to stop the paddle in place</li>
+            </ul>
+          </div>
+          <div>
+            <span>Wanna play with a friend? Send them this code: </span>
+            <span>{roomCode}</span>
+            <Button
+              variant="contained"
+              color="default"
+              onClick={() => navigator.clipboard.writeText(roomCode)}
+            >
+              Copy code
+            </Button>
+          </div>
+          <div>
+            <Button
+              variant="contained"
+              color="default"
+              onClick={() => this.readyToPlay()}
+            >
+              Ready Up!
+            </Button>
+            <Button
+              variant="contained"
+              color="default"
+              onClick={() => this.backToLobby()}
+            >
+              Back to the Lobby
+            </Button>
+          </div>
+          <Sketch
+            mouseClicked={this.mouseClicked}
+            setup={this.setup}
+            draw={this.draw}
+          />
         </div>
-        <div>
-          <h3>Control your paddle with your voice:</h3>
-          <ul>
-            <li>Say "Up" to move the paddle up</li>
-            <li>Say "Down" to move the paddle down</li>
-            <li>Say "Stay" to stop the paddle in place</li>
-          </ul>
-        </div>
-        <div>
-          <span>Wanna play with a friend? Send them this code: </span>
-          <span>{roomCode}</span>
-          <Button onClick={() => navigator.clipboard.writeText(roomCode)}>
-            Copy code
-          </Button>
-        </div>
-        <div>
-          <Button onClick={() => this.readyToPlay()}>Ready Up!</Button>
-        </div>
-        <Sketch
-          mouseClicked={this.mouseClicked}
-          setup={this.setup}
-          draw={this.draw}
-        />
-        <Button variant="outlined" onClick={() => this.backToLobby()}>
-          Back to the Lobby
-        </Button>
       </div>
     )
   }

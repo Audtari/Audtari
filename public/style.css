@@ -1,7 +1,8 @@
 body {
   font-family: atariClassicFont;
   color: white;
-  background-image: url('./Audtari-background-clean.jpg');
+  background-image: url('./Audtari-background-1.jpg');
+  background-position: center 0;
   background-size: cover;
 }
 
@@ -12,18 +13,19 @@ body {
 
 .switchboard {
   display: flex;
-  justify-content: space-evenly;
+  padding-top: 3rem;
 }
 
 .left-side {
   display: flex;
-  justify-content: left;
+  padding-left: 9rem;
 }
 
 .right-side {
   display: flex;
-  justify-content: right;
+  padding-left: 34rem;
 }
+
 /* .component {
   display: grid;
   grid-template-rows: repeat(5);
@@ -83,15 +85,32 @@ body {
 
 a {
   text-decoration: none;
+  margin: 1rem, 1rem;
 }
 
 label {
   display: block;
 }
 
+h2 {
+  display: flex;
+  justify-content: center;
+}
+
+p {
+  display: flex;
+  justify-content: center;
+}
+
 nav a {
   display: inline-block;
   margin: 1em;
+  margin-right: 100px;
+}
+
+#navbar {
+  padding-bottom: 2rem;
+  padding-top: 2rem;
 }
 
 /* #navbar {
@@ -118,6 +137,36 @@ form div {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+}
+
+.card {
+  margin: 1rem;
+  display: flex;
+}
+
+#lobbybuttons {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+#multi {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+h3 {
+  display: flex;
+  justify-content: center;
+}
+
+li {
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  margin: 1rem;
 }
 
 #create-room-form {
