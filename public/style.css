@@ -13,7 +13,8 @@ body {
 
 .switchboard {
   display: flex;
-  padding-top: 3rem;
+  justify-content: space-around;
+  padding-top: 4rem;
 }
 
 .left-side {
@@ -24,6 +25,16 @@ body {
 .right-side {
   display: flex;
   padding-left: 34rem;
+}
+
+.react-p5 {
+  display: flex;
+  justify-content: center;
+}
+
+canvas#defaultCanvas0.p5Canvas {
+  display: flex;
+  justify-content: center;
 }
 
 /* .component {
