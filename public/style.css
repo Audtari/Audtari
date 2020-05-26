@@ -12,18 +12,19 @@ body {
 
 .switchboard {
   display: flex;
-  justify-content: space-evenly;
+  padding-top: 2rem;
 }
 
 .left-side {
   display: flex;
-  justify-content: left;
+  padding-left: 7.5rem;
 }
 
 .right-side {
   display: flex;
-  justify-content: right;
+  padding-left: 29rem;
 }
+
 /* .component {
   display: grid;
   grid-template-rows: repeat(5);
@@ -92,6 +93,12 @@ label {
 nav a {
   display: inline-block;
   margin: 1em;
+  margin-right: 45px;
+}
+
+#navbar {
+  padding-bottom: 2rem;
+  padding-top: 2rem;
 }
 
 /* #navbar {
@@ -118,6 +125,16 @@ form div {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+}
+
+.card {
+  margin: 1rem;
+  display: flex;
+}
+
+#lobbybuttons {
+  display: flex;
+  justify-content: space-evenly;
 }
 
 #create-room-form {
