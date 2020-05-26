@@ -140,6 +140,10 @@ export default class PongMulti extends React.Component {
       p5.text('Waiting for another player', 10, HEIGHT / 2)
       p5.textSize(100)
       timer = 300
+    } else if (ready.player1Ready !== true || ready.player2Ready !== true) {
+      p5.textSize(50)
+      p5.text('Ready up to start the game!', 10, HEIGHT / 2)
+      p5.textSize(100)
     } else if (
       timer > 0 &&
       ready.player1Ready === true &&
