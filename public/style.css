@@ -137,6 +137,26 @@ form div {
   justify-content: space-evenly;
 }
 
+#multi {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+h3 {
+  display: flex;
+  justify-content: center;
+}
+
+li {
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  margin: 1rem;
+}
+
 #create-room-form {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
