@@ -2,6 +2,7 @@ body {
   font-family: atariClassicFont;
   color: white;
   background-image: url('./Audtari-background-1.jpg');
+  background-position: center 0;
   background-size: cover;
 }
 
@@ -12,17 +13,17 @@ body {
 
 .switchboard {
   display: flex;
-  padding-top: 2rem;
+  padding-top: 3rem;
 }
 
 .left-side {
   display: flex;
-  padding-left: 7.5rem;
+  padding-left: 9rem;
 }
 
 .right-side {
   display: flex;
-  padding-left: 29rem;
+  padding-left: 34rem;
 }
 
 /* .component {
@@ -84,16 +85,27 @@ body {
 
 a {
   text-decoration: none;
+  margin: 1rem, 1rem;
 }
 
 label {
   display: block;
 }
 
+h2 {
+  display: flex;
+  justify-content: center;
+}
+
+p {
+  display: flex;
+  justify-content: center;
+}
+
 nav a {
   display: inline-block;
   margin: 1em;
-  margin-right: 45px;
+  margin-right: 100px;
 }
 
 #navbar {

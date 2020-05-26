@@ -16,7 +16,7 @@ const PADDLE_HEIGHT = 80
 const PADDLE_WIDTH = PADDLE_HEIGHT / 5
 const PADDLE_SIDE_MARGIN = 10
 
-const MAX_SCORE = 10
+const MAX_SCORE = 2
 
 // Canvas dimensions
 const WIDTH = 600
